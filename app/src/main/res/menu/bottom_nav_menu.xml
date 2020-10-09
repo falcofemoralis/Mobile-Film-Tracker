@@ -3,12 +3,12 @@
 
     <item
         android:id="@+id/navigation_home"
-        android:icon="@drawable/ic_baseline_search_24"
+        android:icon="@drawable/ic_baseline_movie_24"
         android:title="Movies" />
 
     <item
         android:id="@+id/navigation_dashboard"
-        android:icon="@drawable/ic_baseline_movie_24"
+        android:icon="@drawable/ic_baseline_search_24"
         android:title="Search for movie" />
 
 </menu>

@@ -36,12 +36,6 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/test_image"
-                    android:layout_width="400dp"
-                    android:layout_height="400dp"
-                    tools:srcCompat="@drawable/tt0002844" />
-
             </LinearLayout>
         </HorizontalScrollView>
     </LinearLayout>

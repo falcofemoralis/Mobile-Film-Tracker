@@ -36,24 +36,36 @@ public class MainFragment extends Fragment {
 
         DatabaseOpenHelper dataBaseOpener = new DatabaseOpenHelper(view.getContext(), "imdb.db");
         SQLiteDatabase database = dataBaseOpener.getReadableDatabase();
-        String selectQuery = "select titles.title_id, titles.original_title, ratings.rating from titles inner join ratings on titles.title_id=ratings.title_id limit 1000;";
+        String selectQuery = "select titles.title_id, titles.primary_title, ratings.rating from titles inner join ratings on titles.title_id=ratings.title_id limit 1000;";
         Cursor cursor = database.rawQuery(selectQuery, null);
         Random random = new Random();
         ResoursesManagers resoursesManagers = new ResoursesManagers(view.getContext());
-        for (int i = 0; i < 1; i++) {
+
+        final int SCALE_FACTOR = 2;
+
+        for (int i = 0; i < 5; i++) {
             cursor.moveToPosition(random.nextInt(cursor.getCount()));
             String title_id = cursor.getString(cursor.getColumnIndex("title_id"));
-            ImageView filmPoster = (ImageView) LayoutInflater.from(view.getContext()).inflate(R.layout.inflate_movie, null);
+            String primary_title = cursor.getString(cursor.getColumnIndex("primary_title"));
+            String rating = cursor.getString(cursor.getColumnIndex("rating"));
 
-            Drawable drawable = resoursesManagers.getPoster(title_id);
-            filmPoster.setImageDrawable(drawable);
+            Drawable posterDrawable = resoursesManagers.getPoster(title_id);
+            int height = posterDrawable.getIntrinsicHeight();
+            int width = posterDrawable.getIntrinsicWidth();
 
-            Drawable drawable1 = view.getContext().getDrawable(R.drawable.tt0002844);
-            drawable1 = drawable;
-            filmPoster.setImageDrawable(drawable1);
-          //  popular_movies_layout.addView(filmPoster);
-            ImageView testImage = view.findViewById(R.id.test_image);
-            testImage.setImageDrawable(drawable1);
+            LinearLayout movieLayout = (LinearLayout) LayoutInflater.from(view.getContext()).inflate(R.layout.inflate_movie, null);
+
+            ImageView filmPoster = (ImageView) movieLayout.getChildAt(0);
+            filmPoster.setLayoutParams(new LinearLayout.LayoutParams(width * SCALE_FACTOR,height * SCALE_FACTOR));
+            filmPoster.setImageDrawable(posterDrawable);
+
+            TextView filmTitle = (TextView) movieLayout.getChildAt(1);
+            filmTitle.setText(primary_title);
+
+
+            TextView filmRating = (TextView) movieLayout.getChildAt(2);
+            filmRating.setText(rating);
+            popular_movies_layout.addView(movieLayout);
         }
 
         return view;
