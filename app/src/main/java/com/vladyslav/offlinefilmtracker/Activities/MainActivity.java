@@ -1,4 +1,4 @@
-package com.vladyslav.offlinefilmtracker.activities;
+package com.vladyslav.offlinefilmtracker.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
