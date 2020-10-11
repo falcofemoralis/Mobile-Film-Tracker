@@ -11,7 +11,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.vladyslav.offlinefilmtracker.Activities.MainActivity;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseHelper;
 import com.vladyslav.offlinefilmtracker.Managers.ResoursesManager;
@@ -25,7 +29,7 @@ public class MainFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_main, container, false);
+        final View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         Random random = new Random();
         ResoursesManager resoursesManager = new ResoursesManager(view.getContext());
@@ -37,7 +41,7 @@ public class MainFragment extends Fragment {
         //получаем необходимые данные из базы данных
         Cursor cursor = databaseHelper.runSQLQuery("SELECT titles.title_id, titles.primary_title, ratings.rating " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id" +
-                " WHERE ratings.rating > 7.5 AND ratings.votes > 500 AND titles.premiered > 2015;");
+                " WHERE ratings.rating > 7.5 AND ratings.votes > 5000 AND titles.premiered > 2019;");
 
         for (int i = 0; i < FILMS_IN_ROW; i++) {
             //получаем необходимые данные из массива
@@ -68,6 +72,19 @@ public class MainFragment extends Fragment {
             //ставим рейтинг фильму
             TextView filmRating = (TextView) movieLayout.getChildAt(2);
             filmRating.setText(rating);
+
+            //добавляем нажатие
+            movieLayout.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    MovieFragment movieFragment = new MovieFragment();
+                    MainActivity.fm.beginTransaction().hide(MainActivity.mainFragment).hide(MainActivity.mainFragment).commit();
+                    MainActivity.fm.beginTransaction().add(R.id.main_fragment_container, movieFragment, "currentFragment").commit();
+
+                    BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
+                    bottomNavigationView.setVisibility(View.GONE);
+                }
+            });
 
             //добавляем view в лаяут
             popular_movies_layout.addView(movieLayout);
