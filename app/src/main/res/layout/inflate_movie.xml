@@ -17,7 +17,7 @@
         android:maxEms="7"
         android:singleLine="false"
         android:text="Movie title"
-        android:textColor="#000000"
+        android:textColor="@color/white"
         android:textSize="12sp" />
 
     <TextView
@@ -27,7 +27,7 @@
         android:maxEms="7"
         android:singleLine="false"
         android:text="Rating"
-        android:textColor="#000000"
+        android:textColor="@color/white"
         android:textSize="12sp" />
 
 </LinearLayout>

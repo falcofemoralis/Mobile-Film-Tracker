@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#FFFFFF"
-    tools:context=".Fragments.MovieFragment">
+    tools:context=".Fragments.FilmFragment">
 
     <LinearLayout
         android:id="@+id/linearLayout"
@@ -79,7 +79,7 @@
             android:orientation="vertical">
 
             <TextView
-                android:id="@+id/textView4"
+                android:id="@+id/test"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -139,6 +139,7 @@
         app:layout_constraintVertical_bias="0.0">
 
         <LinearLayout
+            android:id="@+id/actor_layout"
             android:layout_width="100dp"
             android:layout_height="match_parent"
             android:orientation="vertical">
@@ -162,6 +163,4 @@
                 android:text="TextView" />
         </LinearLayout>
     </LinearLayout>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>
