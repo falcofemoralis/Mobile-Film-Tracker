@@ -17,7 +17,8 @@
         app:layout_constraintBottom_toTopOf="@+id/main_fragment_container"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/csn_logo" />
 
 
     <FrameLayout

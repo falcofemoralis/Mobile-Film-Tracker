@@ -8,12 +8,12 @@ import com.google.android.vending.expansion.zipfile.ZipResourceFile;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class ResoursesManager {
+public class ResourcesManager {
 
     private String obbFilePath;
     private ZipResourceFile expansionFile;
 
-    public ResoursesManager(Context context) {
+    public ResourcesManager(Context context) {
         obbFilePath = context.getObbDir().getPath() + "/main.1.com.vladyslav.offlinefilmtracker.zip";
         try {
             expansionFile = new ZipResourceFile(obbFilePath);

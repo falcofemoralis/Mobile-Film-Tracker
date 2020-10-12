@@ -66,7 +66,7 @@ public class FragmentHelper {
 
             //удалаяем из списка открытый фрагмент
             openedFragments.remove(openedFragments.size() - 1);
-            if(openedFragments.size() == 1) return 0;
+            if (openedFragments.size() == 1) return 0;
             return 1;
         }
 

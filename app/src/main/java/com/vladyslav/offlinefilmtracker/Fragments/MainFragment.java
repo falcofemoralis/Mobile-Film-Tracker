@@ -16,18 +16,19 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseHelper;
-import com.vladyslav.offlinefilmtracker.Managers.ResoursesManager;
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 
 public class MainFragment extends Fragment {
-    final private int SCALE_FACTOR = 2, FILMS_IN_ROW = 7;
-    ResoursesManager resoursesManager;
+    final private double POSTER_SCALE_FACTOR = 2.5; //размер постеров у фильмов
+    final private int FILMS_IN_ROW = 7; //кол-во фильмов в строке
+    ResourcesManager resourcesManager; //доступ к файлам постеров
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         final View view = inflater.inflate(R.layout.fragment_main, container, false);
 
-        resoursesManager = new ResoursesManager(view.getContext());
-        DatabaseHelper databaseHelper = new DatabaseHelper(view.getContext(), "imdb.db");
+        resourcesManager = new ResourcesManager(view.getContext());
+        DatabaseHelper databaseHelper = DatabaseHelper.getInstance(view.getContext());
 
         //получаем необходимые данные из базы данных
         Cursor popularFilmsCursor = databaseHelper.runSQLQuery("SELECT titles.title_id, titles.primary_title, ratings.rating " +
@@ -40,13 +41,11 @@ public class MainFragment extends Fragment {
                 break;
             }
 
-
         //получаем необходимые данные из базы данных
         Cursor adventureFilmsCursor = databaseHelper.runSQLQuery("SELECT titles.title_id, titles.primary_title, ratings.rating " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like '%Adventure%'");
         LinearLayout adventureFilmsLayout = view.findViewById(R.id.fragment_main_ll_adventurerFilms);
-
         for (int i = 0; i < FILMS_IN_ROW; i++)
             if (!addFilm(adventureFilmsCursor, adventureFilmsLayout)) {
                 --i;
@@ -55,35 +54,33 @@ public class MainFragment extends Fragment {
         return view;
     }
 
+    //добавление нового фильма в указанный лаяут
     private boolean addFilm(Cursor cursor, LinearLayout baseLayout) {
         cursor.moveToNext();
+
+        //получаем основную информацию про фильм
         final String title = cursor.getString(cursor.getColumnIndex("primary_title"));
         final String film_id = cursor.getString(cursor.getColumnIndex("title_id"));
         final String rating = cursor.getString(cursor.getColumnIndex("rating"));
 
         //получаем постер
-        final Drawable posterDrawable = resoursesManager.getPosterByTitleId(film_id);
-        if (posterDrawable == null) {
+        final Drawable posterDrawable = resourcesManager.getPosterByTitleId(film_id);
+        if (posterDrawable == null)
             return false;
-        }
 
         //создаем View для постера
         LinearLayout movieLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_movie, null);
 
         //ставим постер
         ImageView filmPoster = (ImageView) movieLayout.getChildAt(0);
-        filmPoster.setLayoutParams(new LinearLayout.LayoutParams(posterDrawable.getIntrinsicWidth() * SCALE_FACTOR, posterDrawable.getIntrinsicHeight() * SCALE_FACTOR));
+        filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (posterDrawable.getIntrinsicWidth() * POSTER_SCALE_FACTOR), (int) (posterDrawable.getIntrinsicHeight() * POSTER_SCALE_FACTOR)));
         filmPoster.setImageDrawable(posterDrawable);
 
-        //ставим название фильма
-        TextView filmTitle = (TextView) movieLayout.getChildAt(1);
-        filmTitle.setText(title);
+        //ставим основную информацию
+        ((TextView) movieLayout.getChildAt(1)).setText(title);
+        ((TextView) movieLayout.getChildAt(2)).setText(rating);
 
-        //ставим рейтинг фильму
-        TextView filmRating = (TextView) movieLayout.getChildAt(2);
-        filmRating.setText(rating);
-
-        //добавляем нажатие
+        //добавляем нажатие для перехода на фрагмент фильма
         movieLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
