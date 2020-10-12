@@ -62,7 +62,7 @@ public class MainFragment extends Fragment {
         final String rating = cursor.getString(cursor.getColumnIndex("rating"));
 
         //получаем постер
-        Drawable posterDrawable = resoursesManager.getPosterByTitleId(film_id);
+        final Drawable posterDrawable = resoursesManager.getPosterByTitleId(film_id);
         if (posterDrawable == null) {
             return false;
         }
@@ -88,7 +88,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentHelper fragmentHelper = new FragmentHelper();
-                fragmentHelper.openFragment(new FilmFragment("hello " + title));
+                fragmentHelper.openFragment(new FilmFragment(film_id, title, rating, posterDrawable));
 
                 BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
                 bottomNavigationView.setVisibility(View.GONE);
