@@ -31,7 +31,7 @@ public class MainFragment extends Fragment {
         DatabaseHelper databaseHelper = DatabaseHelper.getInstance(view.getContext());
 
         //получаем необходимые данные из базы данных
-        Cursor popularFilmsCursor = databaseHelper.runSQLQuery("SELECT titles.title_id, titles.primary_title, ratings.rating " +
+        Cursor popularFilmsCursor = databaseHelper.runSQLQuery("SELECT titles.title_id, titles.primary_title, ratings.rating, ratings.votes " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id" +
                 " WHERE ratings.rating > 7.5 AND ratings.votes > 5000 AND titles.premiered > 2019");
         LinearLayout popularFilmsLayout = view.findViewById(R.id.fragment_main_ll_popularFilms);
@@ -42,7 +42,7 @@ public class MainFragment extends Fragment {
             }
 
         //получаем необходимые данные из базы данных
-        Cursor adventureFilmsCursor = databaseHelper.runSQLQuery("SELECT titles.title_id, titles.primary_title, ratings.rating " +
+        Cursor adventureFilmsCursor = databaseHelper.runSQLQuery("SELECT titles.title_id, titles.primary_title, ratings.rating, ratings.votes " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like '%Adventure%'");
         LinearLayout adventureFilmsLayout = view.findViewById(R.id.fragment_main_ll_adventurerFilms);
@@ -62,6 +62,7 @@ public class MainFragment extends Fragment {
         final String title = cursor.getString(cursor.getColumnIndex("primary_title"));
         final String film_id = cursor.getString(cursor.getColumnIndex("title_id"));
         final String rating = cursor.getString(cursor.getColumnIndex("rating"));
+        final String votes = cursor.getString(cursor.getColumnIndex("votes"));
 
         //получаем постер
         final Drawable posterDrawable = resourcesManager.getPosterByTitleId(film_id);
@@ -85,7 +86,7 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentHelper fragmentHelper = new FragmentHelper();
-                fragmentHelper.openFragment(new FilmFragment(film_id, title, rating, posterDrawable));
+                fragmentHelper.openFragment(new FilmFragment(film_id, title, rating, posterDrawable, votes));
 
                 BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
                 bottomNavigationView.setVisibility(View.GONE);

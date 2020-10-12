@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_margin="10dp"
+    android:layout_margin="20dp"
     android:background="@color/background">
 
     <LinearLayout
@@ -20,16 +20,15 @@
 
             <TextView
                 android:id="@+id/fragment_film_tv_rating"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:layout_marginTop="10dp"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
                 android:layout_marginEnd="10dp"
-                android:layout_marginBottom="10dp"
                 android:background="@drawable/rating_bg"
                 android:gravity="center"
-                android:text="8.0"
+                android:text="8.0\n (123456)"
                 android:textAlignment="center"
                 android:textColor="#FFFFFF"
+                android:textSize="12sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -39,11 +38,11 @@
                 android:gravity="center"
                 android:text="Test film"
                 android:textColor="@color/main_color_3"
-                android:textSize="22sp" />
+                android:textSize="26sp" />
         </LinearLayout>
 
         <LinearLayout
-            android:id="@+id/fragment_film_ll_tags"
+            android:id="@+id/fragment_film_ll_genres"
             android:layout_width="match_parent"
             android:layout_height="32dp"
             android:layout_marginTop="10dp"

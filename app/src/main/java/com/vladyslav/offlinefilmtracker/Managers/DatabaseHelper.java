@@ -35,4 +35,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     public Cursor runSQLQuery(String query) {
         return database.rawQuery(query, null);
     }
+
+    public Cursor getPersonByID(String personId){
+        return database.rawQuery(String.format("SELECT people.name FROM people WHERE people.person_id = \"%s\"", personId), null);
+    }
 }

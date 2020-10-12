@@ -19,14 +19,15 @@ import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class FilmFragment extends Fragment {
-    private String film_id, title, rating;
+    private String film_id, title, rating, votes;
     private Drawable poster;
 
-    public FilmFragment(String film_id, String title, String rating, Drawable poster) {
+    public FilmFragment(String film_id, String title, String rating, Drawable poster, String votes) {
         this.film_id = film_id;
         this.title = title;
         this.rating = rating;
         this.poster = poster;
+        this.votes = votes;
     }
 
     @Override
@@ -35,25 +36,27 @@ public class FilmFragment extends Fragment {
         DatabaseHelper databaseHelper = DatabaseHelper.getInstance(view.getContext());
 
         //устанавливаем основную информацию про фильм
-        ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(rating);
+        ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(rating + "\n(" + votes + ")");
         ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(title);
         ((ImageView) view.findViewById(R.id.fragment_film_iv_poster)).setImageDrawable(poster);
 
         //получаем жанры фильма
-        Cursor tagCursor = databaseHelper.runSQLQuery(String.format("SELECT titles.genres FROM titles WHERE titles.title_id = \"%s\";", film_id));
-        tagCursor.moveToFirst();
-        String tags = tagCursor.getString(tagCursor.getColumnIndex("genres"));
-        String[] arrSplit = tags.split(","); //т.к данны приходят в формате String_1, String_2, то нужно разделить
+        Cursor genresCursor = databaseHelper.runSQLQuery(String.format("SELECT titles.genres FROM titles WHERE titles.title_id = \"%s\";", film_id));
+        genresCursor.moveToFirst();
+        String genres = genresCursor.getString(genresCursor.getColumnIndex("genres"));
+        String[] arrSplit = genres.split(","); //т.к данны приходят в формате String_1, String_2, то нужно разделить
 
-        LinearLayout tagsLayout = view.findViewById(R.id.fragment_film_ll_tags);
+        LinearLayout genresLayout = view.findViewById(R.id.fragment_film_ll_genres);
         for (int i = 0; i < arrSplit.length; ++i) {
-            TextView tag = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
-            tag.setText(arrSplit[i]);
-            tagsLayout.addView(tag);
+            TextView genresTV = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
+            genresTV.setText(arrSplit[i]);
+            genresLayout.addView(genresTV);
         }
 
         //устанавливаем допольнительную информацию про фильм
-        Cursor additionalInfoCursor = databaseHelper.runSQLQuery(String.format("SELECT titles.premiered, titles.runtime_minutes, titles.is_adult FROM titles WHERE titles.title_id = \"%s\";", film_id));
+        Cursor additionalInfoCursor = databaseHelper.runSQLQuery(String.format("SELECT titles.premiered, titles.runtime_minutes, titles.is_adult " +
+                "FROM titles " +
+                "WHERE titles.title_id = \"%s\";", film_id));
         additionalInfoCursor.moveToFirst();
         ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText("Release date" + ": " + additionalInfoCursor.getString(additionalInfoCursor.getColumnIndex("premiered")));
         ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText("Runtime" + ": " + additionalInfoCursor.getString(additionalInfoCursor.getColumnIndex("runtime_minutes")) + " minutes");
@@ -64,12 +67,23 @@ public class FilmFragment extends Fragment {
         else
             adult.setVisibility(View.GONE);
 
+        //устанавливаем режисера
+        Cursor directorCursor = databaseHelper.runSQLQuery(String.format("SELECT crew.person_id " +
+                "FROM crew" +
+                " WHERE crew.title_id = \"%s\" and crew.category = \"director\";", film_id));
 
-        Cursor directorCursor = databaseHelper.runSQLQuery(String.format("SELECT crew.person_id FROM crew WHERE crew.title_id = \"%s\" and crew.category = \"director\";", film_id));
-        directorCursor.moveToFirst();
-        ((TextView) view.findViewById(R.id.fragment_film_tv_directors)).setText(directorCursor.getString(directorCursor.getColumnIndex("person_id")));
+        TextView directorTV = view.findViewById(R.id.fragment_film_tv_directors);
+        directorTV.setText("Director: ");
+        for (int i = 0; i < directorCursor.getCount(); ++i) {
+            directorCursor.moveToPosition(i);
+            Cursor director = databaseHelper.getPersonByID(directorCursor.getString(directorCursor.getColumnIndex("person_id")));
+            director.moveToFirst();
+            directorTV.append(director.getString(director.getColumnIndex("name")) + " ");
+        }
 
-        //SELECT people.name FROM people WHERE people.person_id = (SELECT crew.person_id FROM crew WHERE crew.title_id = "%s" and crew.category = "director");
+
+        //устанавливаем акетеров
+
         //устанавлиаем обработчик нажатия для актера
         LinearLayout linearLayout = view.findViewById(R.id.actor_layout);
         linearLayout.setOnClickListener(new View.OnClickListener() {
