@@ -18,7 +18,7 @@ public class FragmentHelper {
     public static MainFragment mainFragment = new MainFragment();//главный фрагмент
     public static SearchFragment searchFragment = new SearchFragment();//фрагмент поиска
 
-    //инициализация хелпера
+    //инициализация фрагментов боттом бара
     public static void init(FragmentManager fragmentManager) {
         fm = fragmentManager; // получаем менеджер фрагментов при инициалзиации
 
@@ -29,7 +29,7 @@ public class FragmentHelper {
     }
 
     //смена фрагмента с сохранением состояния в боттом баре
-    public void changeFragment(Fragment fragmentToChange) {
+    public static void changeFragment(Fragment fragmentToChange) {
         //скрываем предыдущий фрагмент и показывает выбранный фрагмент
         fm.beginTransaction().hide(openedFragments.get(0)).commit();
         fm.beginTransaction().show(fragmentToChange).commit();
@@ -40,7 +40,7 @@ public class FragmentHelper {
     }
 
     //открываем фрагмент поверх другого фрагмента с сохранением состояния
-    public void openFragment(Fragment fragmentToOpen) {
+    public static void openFragment(Fragment fragmentToOpen) {
         openedFragments.add(fragmentToOpen); // добавляем новый открытый фрагмент в список
         fm.beginTransaction().hide(openedFragments.get(openedFragments.size() - 2)).commit(); //скрываем текщий фрагмент
 
@@ -57,7 +57,7 @@ public class FragmentHelper {
     }
 
     //закрытие фрагмента при нажатии кнопки Back (используется в OnBackPressed)
-    public int closeFragment() {
+    public static int closeFragment() {
         //если в списке есть более чем один открытый фрагмент, его следует закрыть, иначе просто будет выходит из приложения
         if (openedFragments.size() != 1) {
             //скрываем текущий фрагмент и показываем предыдущий из списка

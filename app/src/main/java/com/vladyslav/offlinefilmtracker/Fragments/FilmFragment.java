@@ -14,77 +14,35 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.vladyslav.offlinefilmtracker.Managers.DatabaseHelper;
+import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.R;
+import com.vladyslav.offlinefilmtracker.Objects.Film;
 
 public class FilmFragment extends Fragment {
-    private String film_id, title, rating, votes;
-    private Drawable poster;
+    DatabaseManager databaseManager;
+    Film film;
 
-    public FilmFragment(String film_id, String title, String rating, Drawable poster, String votes) {
-        this.film_id = film_id;
-        this.title = title;
-        this.rating = rating;
-        this.poster = poster;
-        this.votes = votes;
+    public FilmFragment(Film film) {
+        this.film = film;
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_film, container, false);
-        DatabaseHelper databaseHelper = DatabaseHelper.getInstance(view.getContext());
+        databaseManager = DatabaseManager.getInstance(view.getContext());
 
-        //устанавливаем основную информацию про фильм
-        ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(rating + "\n(" + votes + ")");
-        ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(title);
-        ((ImageView) view.findViewById(R.id.fragment_film_iv_poster)).setImageDrawable(poster);
+        setBaseFilmInfo(view);
+        setAdditionalFilmInfo(view);
+       // setDirector(view);
 
-        //получаем жанры фильма
-        Cursor genresCursor = databaseHelper.runSQLQuery(String.format("SELECT titles.genres FROM titles WHERE titles.title_id = \"%s\";", film_id));
-        genresCursor.moveToFirst();
-        String genres = genresCursor.getString(genresCursor.getColumnIndex("genres"));
-        String[] arrSplit = genres.split(","); //т.к данны приходят в формате String_1, String_2, то нужно разделить
-
-        LinearLayout genresLayout = view.findViewById(R.id.fragment_film_ll_genres);
-        for (int i = 0; i < arrSplit.length; ++i) {
-            TextView genresTV = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
-            genresTV.setText(arrSplit[i]);
-            genresLayout.addView(genresTV);
-        }
-
-        //устанавливаем допольнительную информацию про фильм
-        Cursor additionalInfoCursor = databaseHelper.runSQLQuery(String.format("SELECT titles.premiered, titles.runtime_minutes, titles.is_adult " +
-                "FROM titles " +
-                "WHERE titles.title_id = \"%s\";", film_id));
-        additionalInfoCursor.moveToFirst();
-        ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText("Release date" + ": " + additionalInfoCursor.getString(additionalInfoCursor.getColumnIndex("premiered")));
-        ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText("Runtime" + ": " + additionalInfoCursor.getString(additionalInfoCursor.getColumnIndex("runtime_minutes")) + " minutes");
-
-        TextView adult = view.findViewById(R.id.fragment_film_tv_adult);
-        if (Boolean.parseBoolean(additionalInfoCursor.getString(additionalInfoCursor.getColumnIndex("is_adult"))))
-            adult.setText("18+");
-        else
-            adult.setVisibility(View.GONE);
-
-        //устанавливаем режисера
-        Cursor directorCursor = databaseHelper.runSQLQuery(String.format("SELECT crew.person_id " +
-                "FROM crew" +
-                " WHERE crew.title_id = \"%s\" and crew.category = \"director\";", film_id));
-
-        TextView directorTV = view.findViewById(R.id.fragment_film_tv_directors);
-        directorTV.setText("Director: ");
-        for (int i = 0; i < directorCursor.getCount(); ++i) {
-            directorCursor.moveToPosition(i);
-            Cursor director = databaseHelper.getPersonByID(directorCursor.getString(directorCursor.getColumnIndex("person_id")));
-            director.moveToFirst();
-            directorTV.append(director.getString(director.getColumnIndex("name")) + " ");
-        }
-
+        //SELECT crew.person_id FROM crew WHERE crew.title_id = "tt0816692";
+        //  Cursor actorsCursor = databaseHelper.runSQLQuery("SELECT * FROM")
 
         //устанавливаем акетеров
 
         //устанавлиаем обработчик нажатия для актера
+        //TODO убрать FORMAT !!!
         LinearLayout linearLayout = view.findViewById(R.id.actor_layout);
         linearLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -96,6 +54,55 @@ public class FilmFragment extends Fragment {
                 bottomNavigationView.setVisibility(View.GONE);
             }
         });
+
         return view;
     }
+
+    //устанавливаем основную информацию про фильм
+    private void setBaseFilmInfo(View view) {
+        //устанавливаем основную информацию
+        ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(film.getRating() + "\n(" + film.getVotes() + ")");
+        ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(film.getTitle());
+        ((ImageView) view.findViewById(R.id.fragment_film_iv_poster)).setImageDrawable(film.getPoster(getContext()));
+
+        //устанавливаем жанры фильма
+        String[] genres = film.getGenres();
+        LinearLayout genresLayout = view.findViewById(R.id.fragment_film_ll_genres);
+        for (int i = 0; i < genres.length; ++i) {
+            TextView genresTV = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
+            genresTV.setText(genres[i]);
+            genresLayout.addView(genresTV);
+        }
+    }
+
+    //устанавливаем допольнительную информацию про фильм
+    private void setAdditionalFilmInfo(View view) {
+        ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText("Release date" + ": " + film.getPremiered());
+        ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText("Runtime" + ": " + film.getRuntime_minutes() + " minutes");
+
+        TextView adult = view.findViewById(R.id.fragment_film_tv_adult);
+        if (film.getIsAdult())
+            adult.setText("18+");
+        else
+            adult.setVisibility(View.GONE);
+    }
+
+    //устанавливаем режисера
+/*    private void setDirector(View view) {
+        Cursor directorsCursor = databaseManager.runSQLQuery("SELECT crew.person_id " +
+                "FROM crew" +
+                " WHERE crew.title_id = \"?\" and crew.category = \"director\";");
+
+        TextView directorTV = view.findViewById(R.id.fragment_film_tv_directors);
+        directorsCursor.moveToPosition(0);
+        directorTV.setText("Director: ");
+
+        //в случае если режисереов больше чем 1
+        for (int i = 0; i < directorsCursor.getCount(); ++i) {
+            directorsCursor.moveToPosition(i);
+            Cursor director = databaseManager.getPersonByID(directorsCursor.getString(directorsCursor.getColumnIndex("person_id")));
+            director.moveToFirst();
+            directorTV.append(director.getString(director.getColumnIndex("name")) + " ");
+        }
+    }*/
 }

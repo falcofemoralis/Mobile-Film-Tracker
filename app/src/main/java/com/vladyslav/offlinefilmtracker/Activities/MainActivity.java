@@ -13,15 +13,13 @@ import com.vladyslav.offlinefilmtracker.R;
 
 public class MainActivity extends AppCompatActivity {
     BottomNavigationView bottomNavigationView;
-    FragmentHelper fragmentHelper;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        fragmentHelper = new FragmentHelper();
-        fragmentHelper.init(getSupportFragmentManager());
+        FragmentHelper.init(getSupportFragmentManager());
 
         bottomNavigationView = findViewById(R.id.activity_main_nv_bottomBar);
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -29,10 +27,10 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.nav_movies:
-                        fragmentHelper.changeFragment(FragmentHelper.mainFragment);
+                        FragmentHelper.changeFragment(FragmentHelper.mainFragment);
                         break;
                     case R.id.nav_search:
-                        fragmentHelper.changeFragment(FragmentHelper.searchFragment);
+                        FragmentHelper.changeFragment(FragmentHelper.searchFragment);
                         break;
                 }
                 return true;
@@ -42,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-        switch (fragmentHelper.closeFragment()) {
+        switch (FragmentHelper.closeFragment()) {
             case 0:
                 bottomNavigationView.setVisibility(View.VISIBLE);
                 return;
