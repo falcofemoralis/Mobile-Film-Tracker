@@ -55,24 +55,20 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     public Actor[] getActorsByTitleId(String titleId) {
-        Cursor cursor = database.rawQuery("SELECT crew.person_id " +
-                "FROM crew" +
-                " WHERE crew.title_id = ?", new String[]{titleId});
+        Cursor cursor = database.rawQuery("SELECT people.person_id, people.name, people.born, people.died, crew.characters, crew.category " +
+                "FROM crew INNER JOIN people ON people.person_id = crew.person_id " +
+                "WHERE crew.title_id = ?", new String[]{titleId});
 
         Actor[] actors = new Actor[cursor.getCount()];
         int n = 0;
         while (cursor.moveToNext()) {
-            String person_id = cursor.getString(cursor.getColumnIndex("person_id"));
-            Cursor person = getPersonByID(person_id);
-            actors[n++] = new Actor(person_id,
-                    person.getString(person.getColumnIndex("name")),
-                    person.getString(person.getColumnIndex("born")),
-                    person.getString(person.getColumnIndex("died")));
+            actors[n++] = new Actor(cursor.getString(cursor.getColumnIndex("person_id")),
+                    cursor.getString(cursor.getColumnIndex("name")),
+                    cursor.getString(cursor.getColumnIndex("born")),
+                    cursor.getString(cursor.getColumnIndex("died")),
+                    cursor.getString(cursor.getColumnIndex("characters")),
+                    cursor.getString(cursor.getColumnIndex("category")));
         }
         return actors;
-    }
-
-    public Cursor getPersonByID(String personId) {
-        return database.rawQuery("SELECT people.name FROM people WHERE people.person_id = ?", new String[]{personId});
     }
 }

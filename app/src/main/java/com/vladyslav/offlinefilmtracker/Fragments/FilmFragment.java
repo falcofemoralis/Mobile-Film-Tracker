@@ -1,7 +1,5 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
-import android.database.Cursor;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -35,11 +33,7 @@ public class FilmFragment extends Fragment {
 
         setBaseFilmInfo(view);
         setAdditionalFilmInfo(view);
-        setDirector(view);
-
-        //устанавливаем акетеров
-        Actor[] actors = databaseManager.getActorsByTitleId(film.getFilm_id());
-
+        setCrew(view);
 
         //устанавлиаем обработчик нажатия для актера
         //TODO убрать FORMAT !!!
@@ -87,21 +81,17 @@ public class FilmFragment extends Fragment {
             adult.setVisibility(View.GONE);
     }
 
-    //устанавливаем режисера
-    private void setDirector(View view) {
-        Cursor directorsCursor = databaseManager.database.rawQuery("SELECT crew.person_id " +
-                "FROM crew" +
-                " WHERE crew.title_id = ? and crew.category = 'director';", new String[]{film.getFilm_id()});
+    private void setCrew(View view) {
+        Actor[] actors = databaseManager.getActorsByTitleId(film.getFilm_id());
 
         TextView directorTV = view.findViewById(R.id.fragment_film_tv_directors);
         directorTV.setText("Director: ");
 
-        //в случае если режисереов больше чем 1
-        for (int i = 0; i < directorsCursor.getCount(); ++i) {
-            directorsCursor.moveToPosition(i);
-            Cursor director = databaseManager.getPersonByID(directorsCursor.getString(directorsCursor.getColumnIndex("person_id")));
-            director.moveToFirst();
-            directorTV.append(director.getString(director.getColumnIndex("name")) + " ");
+        for (Actor actor : actors) {
+            switch (actor.getCategory()) {
+                case "director":
+                    directorTV.append(actor.getName() + " ");
+            }
         }
     }
 }
