@@ -34,21 +34,6 @@ public class FilmFragment extends Fragment {
         setBaseFilmInfo(view);
         setAdditionalFilmInfo(view);
         setCrew(view);
-
-        //устанавлиаем обработчик нажатия для актера
-        //TODO убрать FORMAT !!!
-        LinearLayout linearLayout = view.findViewById(R.id.actor_layout);
-        linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentHelper fragmentHelper = new FragmentHelper();
-                fragmentHelper.openFragment(new ActorFilmsFragment());
-
-                BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
-                bottomNavigationView.setVisibility(View.GONE);
-            }
-        });
-
         return view;
     }
 
@@ -81,16 +66,47 @@ public class FilmFragment extends Fragment {
             adult.setVisibility(View.GONE);
     }
 
+    //устанавливем комманду
     private void setCrew(View view) {
         Actor[] actors = databaseManager.getActorsByTitleId(film.getFilm_id());
+        LinearLayout actorsLayout = view.findViewById(R.id.fragment_film_ll_actorsLayout);
 
         TextView directorTV = view.findViewById(R.id.fragment_film_tv_directors);
         directorTV.setText("Director: ");
 
-        for (Actor actor : actors) {
+        TextView producerTV = view.findViewById(R.id.fragment_film_tv_producers);
+        producerTV.setText("Producers: ");
+
+        TextView writerTV = view.findViewById(R.id.fragment_film_tv_writers);
+        writerTV.setText("Writers: ");
+        for (final Actor actor : actors) {
             switch (actor.getCategory()) {
                 case "director":
                     directorTV.append(actor.getName() + " ");
+                    break;
+                case "producer":
+                    producerTV.append(actor.getName() + " ");
+                    break;
+                case "writer":
+                    writerTV.append(actor.getName() + " ");
+                    break;
+                default:
+                    LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
+                    ((TextView) layout.getChildAt(0)).setText(actor.getName());
+                    TextView charactersTV = (TextView) layout.getChildAt(1);
+                    charactersTV.setText("");
+                    for (String character : actor.getCharacters())
+                        charactersTV.append(character + "\n");
+
+                    layout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FragmentHelper.openFragment(new ActorFilmsFragment(actor));
+                            BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
+                            bottomNavigationView.setVisibility(View.GONE);
+                        }
+                    });
+                    actorsLayout.addView(layout);
             }
         }
     }

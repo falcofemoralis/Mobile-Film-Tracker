@@ -5,7 +5,7 @@ public class Actor {
     private String name;
     private String born;
     private String died;
-    private String characters;
+    private String[] characters;
     private String category;
 
     public Actor(String person_id, String name, String born, String died, String characters, String category) {
@@ -13,7 +13,8 @@ public class Actor {
         this.name = name;
         this.born = born;
         this.died = died;
-        this.characters = characters;
+        characters = characters.trim();
+        this.characters = characters.substring(1, characters.length() - 1).trim().split("\\s*,\\s*");;
         this.category = category;
     }
 
@@ -33,7 +34,7 @@ public class Actor {
         return died;
     }
 
-    public String getCharacters() {
+    public String[] getCharacters() {
         return characters;
     }
 

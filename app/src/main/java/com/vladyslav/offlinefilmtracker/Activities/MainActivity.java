@@ -49,7 +49,5 @@ public class MainActivity extends AppCompatActivity {
             case -1:
                 super.onBackPressed();
         }
-
-
     }
 }

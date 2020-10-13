@@ -69,6 +69,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
                     cursor.getString(cursor.getColumnIndex("characters")),
                     cursor.getString(cursor.getColumnIndex("category")));
         }
+        cursor.close();
         return actors;
     }
 }
