@@ -30,20 +30,20 @@ public class MainFragment extends Fragment {
         baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
 
         //строка с популярными фильмами
-        Film[] popularFilms = databaseManager.getFilms("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
+        Film[] popularFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
                 "ratings.rating, ratings.votes " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
                 "ORDER BY ratings.votes DESC LIMIT 7");
         createFilmRow(popularFilms, "Popular films");
 
-
         //строка с приключенчискими фильмами
-        Film[] adventureFilms = databaseManager.getFilms("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
+        Film[] adventureFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
                 "ratings.rating, ratings.votes " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like '%Adventure%' LIMIT 7");
         createFilmRow(adventureFilms, "Adventure films");
+
         return view;
     }
 
@@ -53,34 +53,32 @@ public class MainFragment extends Fragment {
         ((TextView) filmsLayout.getChildAt(0)).setText(rowName); //устанавливаем заголовок колонки
         LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         for (int i = 0; i < FILMS_IN_ROW; i++)
-            if (!addFilm(films[i], linearLayout)) {
-                --i;
-                break;
-            }
+            addFilm(films[i], linearLayout);
+
         baseLayout.addView(filmsLayout); //добавляем в корень
     }
 
     //добавление нового фильма в указанный лаяут
-    private boolean addFilm(final Film film, LinearLayout layout) {
+    private void addFilm(final Film film, LinearLayout layout) {
         //получаем постер
-        final Drawable poster = film.getPoster(getContext());
+        Drawable poster = film.getPoster(getContext());
         if (poster == null)
-            return false;
+            poster = getContext().getDrawable(R.drawable.noimage_poster);
 
         //создаем View для постера
-        LinearLayout movieLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, null);
+        LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, null);
 
         //ставим постер
-        ImageView filmPoster = (ImageView) movieLayout.getChildAt(0);
+        ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
         filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * POSTER_SCALE_FACTOR), (int) (poster.getIntrinsicHeight() * POSTER_SCALE_FACTOR)));
         filmPoster.setImageDrawable(poster);
 
         //ставим основную информацию
-        ((TextView) movieLayout.getChildAt(1)).setText(film.getTitle());
-        ((TextView) movieLayout.getChildAt(2)).setText(film.getRating());
+        ((TextView) filmLayout.getChildAt(1)).setText(film.getTitle());
+        ((TextView) filmLayout.getChildAt(2)).setText(film.getRating());
 
         //добавляем нажатие для перехода на фрагмент фильма
-        movieLayout.setOnClickListener(new View.OnClickListener() {
+        filmLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentHelper.openFragment(new FilmFragment(film));
@@ -89,7 +87,6 @@ public class MainFragment extends Fragment {
             }
         });
 
-        layout.addView(movieLayout);
-        return true;
+        layout.addView(filmLayout);
     }
 }

@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper;;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 
+import java.io.File;
+
 //SINGLETON
 public class DatabaseManager extends SQLiteOpenHelper {
     private final static int DATABASE_VERSION = 1;
@@ -35,20 +37,12 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    public Film[] getFilms(String query) {
+    public Film[] getFilmsByQuery(String query) {
         Cursor cursor = database.rawQuery(query, null);
         Film[] film = new Film[cursor.getCount()];
         int n = 0;
-        while (cursor.moveToNext()) {
-            film[n++] = new Film(cursor.getString(cursor.getColumnIndex("title_id")),
-                    cursor.getString(cursor.getColumnIndex("primary_title")),
-                    cursor.getString(cursor.getColumnIndex("rating")),
-                    cursor.getString(cursor.getColumnIndex("votes")),
-                    cursor.getString(cursor.getColumnIndex("runtime_minutes")),
-                    cursor.getString(cursor.getColumnIndex("premiered")),
-                    cursor.getString(cursor.getColumnIndex("is_adult")),
-                    cursor.getString(cursor.getColumnIndex("genres")));
-        }
+        while (cursor.moveToNext())
+            film[n++] = getFilmData(cursor);
 
         cursor.close();
         return film;
@@ -71,5 +65,31 @@ public class DatabaseManager extends SQLiteOpenHelper {
         }
         cursor.close();
         return actors;
+    }
+
+    public Film[] getFilmsByPersonId(String personId) {
+        Cursor cursor = database.rawQuery("SELECT DISTINCT crew.title_id FROM crew WHERE crew.person_id = ?", new String[]{personId});
+        Film[] films = new Film[cursor.getCount()];
+        int n = 0;
+        while (cursor.moveToNext()) {
+            Cursor cursor_films = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title," +
+                    " ratings.rating, ratings.votes " +
+                    "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id WHERE titles.title_id = ?", new String[]{cursor.getString(cursor.getColumnIndex("title_id"))});
+            cursor_films.moveToFirst();
+            films[n++] = getFilmData(cursor_films);
+        }
+        cursor.close();
+        return films;
+    }
+
+    private Film getFilmData(Cursor cursor) {
+        return new Film(cursor.getString(cursor.getColumnIndex("title_id")),
+                cursor.getString(cursor.getColumnIndex("primary_title")),
+                cursor.getString(cursor.getColumnIndex("rating")),
+                cursor.getString(cursor.getColumnIndex("votes")),
+                cursor.getString(cursor.getColumnIndex("runtime_minutes")),
+                cursor.getString(cursor.getColumnIndex("premiered")),
+                cursor.getString(cursor.getColumnIndex("is_adult")),
+                cursor.getString(cursor.getColumnIndex("genres")));
     }
 }

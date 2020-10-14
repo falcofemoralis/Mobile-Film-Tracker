@@ -92,8 +92,9 @@ public class FilmFragment extends Fragment {
                     break;
                 default:
                     LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
-                    ((TextView) layout.getChildAt(0)).setText(actor.getName());
-                    TextView charactersTV = (TextView) layout.getChildAt(1);
+                    ((ImageView) layout.getChildAt(0)).setImageDrawable(actor.getPhoto(getContext()));
+                    ((TextView) layout.getChildAt(1)).setText(actor.getName());
+                    TextView charactersTV = (TextView) layout.getChildAt(2);
                     charactersTV.setText("");
                     for (String character : actor.getCharacters())
                         charactersTV.append(character + "\n");
@@ -101,7 +102,7 @@ public class FilmFragment extends Fragment {
                     layout.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            FragmentHelper.openFragment(new ActorFilmsFragment(actor));
+                            FragmentHelper.openFragment(new ActorFragment(actor));
                             BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
                             bottomNavigationView.setVisibility(View.GONE);
                         }

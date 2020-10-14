@@ -1,5 +1,10 @@
 package com.vladyslav.offlinefilmtracker.Objects;
 
+import android.content.Context;
+import android.graphics.drawable.Drawable;
+
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
+
 public class Actor {
     private String person_id;
     private String name;
@@ -14,7 +19,8 @@ public class Actor {
         this.born = born;
         this.died = died;
         characters = characters.trim();
-        this.characters = characters.substring(1, characters.length() - 1).trim().split("\\s*,\\s*");;
+        this.characters = characters.substring(1, characters.length() - 1).trim().split("\\s*,\\s*");
+        ;
         this.category = category;
     }
 
@@ -40,6 +46,10 @@ public class Actor {
 
     public String getCategory() {
         return category;
+    }
+
+    public Drawable getPhoto(Context context) {
+        return ResourcesManager.getInstance(context).getPhotoByPersonId(person_id);
     }
 
     @Override
