@@ -15,14 +15,45 @@
             android:id="@+id/fragment_actor_films_tv_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/hello_blank_fragment"
-            android:textColor="#FFFFFF" />
+            android:gravity="center"
+            android:padding="15dp"
+            android:text="Ridley Scott"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:paddingBottom="10dp">
+
+            <TextView
+                android:id="@+id/fragment_actor_films_tv_born"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:text="1937"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+
+            <TextView
+                android:id="@+id/fragment_actor_films_tv_died"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0.5"
+                android:gravity="center"
+                android:text="alive"
+                android:textColor="#FFFFFF"
+                android:textSize="18sp" />
+        </LinearLayout>
 
         <TableLayout
             android:id="@+id/fragment_actor_films_tl_films"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="3"
+            android:layout_margin="20dp"
+            android:layout_weight="1"
             android:orientation="vertical" />
     </LinearLayout>
 </ScrollView>
