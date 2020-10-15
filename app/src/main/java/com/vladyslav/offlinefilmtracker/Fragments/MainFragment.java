@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -22,10 +23,24 @@ public class MainFragment extends Fragment {
     final private double POSTER_SCALE_FACTOR = 2.5; //размер постеров у фильмов
     final private int FILMS_IN_ROW = 7; //кол-во фильмов в строке
     private LinearLayout baseLayout; //базовый лаяут
+    private View view;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        final View view = inflater.inflate(R.layout.fragment_main, container, false);
+        //    final View view = inflater.inflate(R.layout.fragment_main, container, false);
+        if (view == null) {
+            // Inflate the layout for this fragment
+            view = inflater.inflate(R.layout.fragment_main, container, false);
+            // Find and setup subviews
+        } else {
+            // Do not inflate the layout again.
+            // The returned View of onCreateView will be added into the fragment.
+            // However it is not allowed to be added twice even if the parent is same.
+            // So we must remove _rootView from the existing parent view group
+            // in onDestroyView() (it will be added back).
+        }
+
+
         DatabaseManager databaseManager = DatabaseManager.getInstance(view.getContext());
         baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
 
@@ -45,6 +60,13 @@ public class MainFragment extends Fragment {
         createFilmRow(adventureFilms, "Adventure films");
 
         return view;
+    }
+    @Override
+    public void onDestroyView() {
+        if (view.getParent() != null) {
+            ((ViewGroup)view.getParent()).removeView(view);
+        }
+        super.onDestroyView();
     }
 
     //создаем строку с фильмами
@@ -80,8 +102,6 @@ public class MainFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 FragmentHelper.openFragment(new FilmFragment(film));
-                BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
-                bottomNavigationView.setVisibility(View.GONE);
             }
         });
 

@@ -102,8 +102,6 @@ public class FilmFragment extends Fragment {
                         @Override
                         public void onClick(View v) {
                             FragmentHelper.openFragment(new ActorFragment(actor));
-                            BottomNavigationView bottomNavigationView = getActivity().findViewById(R.id.activity_main_nv_bottomBar);
-                            bottomNavigationView.setVisibility(View.GONE);
                         }
                     });
                     actorsLayout.addView(layout);
