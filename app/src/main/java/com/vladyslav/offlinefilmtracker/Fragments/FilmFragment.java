@@ -30,7 +30,6 @@ public class FilmFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_film, container, false);
         databaseManager = DatabaseManager.getInstance(view.getContext());
-
         setBaseFilmInfo(view);
         setAdditionalFilmInfo(view);
         setCrew(view);

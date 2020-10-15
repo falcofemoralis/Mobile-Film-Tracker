@@ -8,7 +8,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:orientation="vertical">
 
         <TextView
@@ -24,35 +24,47 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="10dp">
+            android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/fragment_actor_films_tv_born"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:gravity="center"
-                android:text="1937"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp" />
+            <ImageView
+                android:id="@+id/fragment_actor_films_iv_photo"
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:layout_margin="5dp"
+                android:layout_weight="1"
+                android:src="@drawable/noimage_photo" />
 
-            <TextView
-                android:id="@+id/fragment_actor_films_tv_died"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="0.5"
-                android:gravity="center"
-                android:text="alive"
-                android:textColor="#FFFFFF"
-                android:textSize="18sp" />
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/fragment_actor_films_tv_born"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Born: 1980"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp" />
+
+                <TextView
+                    android:id="@+id/fragment_actor_films_tv_died"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="Died: alive"
+                    android:textColor="#FFFFFF"
+                    android:textSize="18sp" />
+            </LinearLayout>
         </LinearLayout>
 
         <TableLayout
             android:id="@+id/fragment_actor_films_tl_films"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="20dp"
+            android:layout_margin="15dp"
             android:layout_weight="1"
             android:orientation="vertical" />
     </LinearLayout>

@@ -49,7 +49,9 @@ public class Film {
     }
 
     public Drawable getPoster(Context context) {
-        return ResourcesManager.getInstance(context).getPosterByTitleId(film_id);
+        Drawable drawable = ResourcesManager.getInstance(context).getPosterByTitleId(film_id);
+        if(drawable == null) drawable = context.getDrawable(R.drawable.noimage_poster);
+        return drawable;
     }
 
     public String getRuntime_minutes() {

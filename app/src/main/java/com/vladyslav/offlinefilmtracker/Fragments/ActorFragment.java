@@ -40,10 +40,9 @@ public class ActorFragment extends Fragment {
     //устанавливаем базовую информацию актеру
     private void setActorBaseInfo(View view) {
         ((TextView) view.findViewById(R.id.fragment_actor_films_tv_name)).setText(actor.getName());
+        ((ImageView) view.findViewById(R.id.fragment_actor_films_iv_photo)).setImageDrawable(actor.getPhoto(getContext()));
         ((TextView) view.findViewById(R.id.fragment_actor_films_tv_born)).setText("Born: " + actor.getBorn());
-        String died = actor.getDied();
-        if(died == null) died = "alive";
-        ((TextView) view.findViewById(R.id.fragment_actor_films_tv_died)).setText("Died: " + died);
+        ((TextView) view.findViewById(R.id.fragment_actor_films_tv_died)).setText("Died: " + actor.getDied());
     }
 
     //устанавливаем фильмы актеру

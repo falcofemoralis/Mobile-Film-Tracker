@@ -62,8 +62,6 @@ public class MainFragment extends Fragment {
     private void addFilm(final Film film, LinearLayout layout) {
         //получаем постер
         Drawable poster = film.getPoster(getContext());
-        if (poster == null)
-            poster = getContext().getDrawable(R.drawable.noimage_poster);
 
         //создаем View для постера
         LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, null);
