@@ -57,11 +57,10 @@
         </LinearLayout>
     </LinearLayout>
 
-    <TableLayout
-        android:id="@+id/fragment_actor_films_tl_films"
+    <LinearLayout
+        android:id="@+id/fragment_actor_films_ll_films"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:layout_weight="1"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        android:layout_margin="15dp"/>
 </LinearLayout>

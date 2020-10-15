@@ -11,6 +11,7 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,73 +92,77 @@ public class FilmFragment extends Fragment {
         Actor[] actors = databaseManager.getActorsByTitleId(film.getFilm_id());
         LinearLayout actorsLayout = view.findViewById(R.id.fragment_film_ll_actorsLayout);
 
-        //TODO упростить код
-        ArrayList<SpannableString> directorsClickable = new ArrayList<>();
-        TextView directorTV = view.findViewById(R.id.fragment_film_tv_directors);
-        directorTV.setText("Director: ");
+        ArrayList<ArrayList<SpannableString>> personsStrings = new ArrayList<>();
+        for (int i = 0; i < 3; ++i) {
+            ArrayList<SpannableString> list = new ArrayList<>();
+            personsStrings.add(list);
+        }
 
-        ArrayList<SpannableString> producerClickable = new ArrayList<>();
-        TextView producerTV = view.findViewById(R.id.fragment_film_tv_producers);
-        producerTV.setText("Producers: ");
+        //TODO уменьшить код
+        ArrayList<TextView> personsTextViews = new ArrayList<>();
+        personsTextViews.add((TextView) view.findViewById(R.id.fragment_film_tv_directors));
+        personsTextViews.get(0).setText("Director: ");
 
-        ArrayList<SpannableString> writersClickable = new ArrayList<>();
-        TextView writerTV = view.findViewById(R.id.fragment_film_tv_writers);
-        writerTV.setText("Writers: ");
+        personsTextViews.add((TextView) view.findViewById(R.id.fragment_film_tv_producers));
+        personsTextViews.get(1).setText("Producers: ");
 
-        for (final Actor actor : actors) {
+        personsTextViews.add((TextView) view.findViewById(R.id.fragment_film_tv_writers));
+        personsTextViews.get(2).setText("Writers: ");
+
+        int n;
+        for (Actor actor : actors) {
             switch (actor.getCategory()) {
                 case "director":
-                    directorsClickable.add(setClickableActorName(directorTV, actor));
+                    n = 0;
                     break;
                 case "producer":
-                    producerClickable.add(setClickableActorName(producerTV, actor));
+                    n = 1;
                     break;
                 case "writer":
-                    writersClickable.add(setClickableActorName(writerTV, actor));
+                    n = 2;
                     break;
                 default:
-                    LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
-                    ((ImageView) layout.getChildAt(0)).setImageDrawable(actor.getPhoto(getContext()));
-                    ((TextView) layout.getChildAt(1)).setText(actor.getName());
-                    TextView charactersTV = (TextView) layout.getChildAt(2);
-                    charactersTV.setText("");
-                    for (String character : actor.getCharacters())
-                        charactersTV.append(character + "\n");
-
-                    layout.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, ActorFragment.newInstance(actor)).addToBackStack(null).commit();
-                        }
-                    });
-                    actorsLayout.addView(layout);
+                    setActor(actor, actorsLayout);
+                    continue;
             }
+            personsStrings.get(n).add(setClickableActorName(personsTextViews.get(n), actor));
         }
 
-        for(int i=0;i<directorsClickable.size();i++){
-            directorTV.append(directorsClickable.get(i));
-            if(i!=directorsClickable.size()-1) directorTV.append(", ");
-        }
-
-        for(int i=0;i<producerClickable.size();i++){
-            producerTV.append(producerClickable.get(i));
-            if(i!=producerClickable.size()-1) producerTV.append(", ");
-        }
-
-        for(int i=0;i<writersClickable.size();i++){
-            writerTV.append(writersClickable.get(i));
-            if(i!=writersClickable.size()-1) writerTV.append(", ");
+        for (int i = 0; i < personsStrings.size(); i++) {
+            for (int j = 0; j < personsStrings.get(i).size(); j++) {
+                personsTextViews.get(i).append(personsStrings.get(i).get(j));
+                if (j != personsStrings.get(i).size() - 1) personsTextViews.get(i).append(", ");
+            }
         }
     }
 
+    //установка актера в колонку Crew
+    private void setActor(final Actor actor, LinearLayout actorsLayout) {
+        LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
+        ((ImageView) layout.getChildAt(0)).setImageDrawable(actor.getPhoto(getContext()));
+        ((TextView) layout.getChildAt(1)).setText(actor.getName());
+        TextView charactersTV = (TextView) layout.getChildAt(2);
+        charactersTV.setText("");
+        for (String character : actor.getCharacters())
+            charactersTV.append(character + "\n");
+        layout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, ActorFragment.newInstance(actor)).addToBackStack(null).commit();
+            }
+        });
+        actorsLayout.addView(layout);
+    }
 
-    private SpannableString setClickableActorName(TextView textView, final Actor actor){
+    //установка перехода по нажатию на имя режисера
+    private SpannableString setClickableActorName(TextView textView, final Actor actor) {
         SpannableString ss = new SpannableString(actor.getName());
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View textView) {
                 getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, ActorFragment.newInstance(actor)).addToBackStack(null).commit();
             }
+
             @Override
             public void updateDrawState(TextPaint ds) {
                 super.updateDrawState(ds);

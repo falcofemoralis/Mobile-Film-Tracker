@@ -49,7 +49,7 @@ public class MainFragment extends Fragment {
 
     //создаем строку с фильмами
     private void createFilmRow(Film[] films, String rowName) {
-        LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_filmrow, null); //колонка фильмов
+        LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //колонка фильмов
         ((TextView) filmsLayout.getChildAt(0)).setText(rowName); //устанавливаем заголовок колонки
         LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         for (int i = 0; i < FILMS_IN_ROW; i++)

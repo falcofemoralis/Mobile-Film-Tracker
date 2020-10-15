@@ -101,6 +101,18 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return films;
     }
 
+    public String[] getRoleByTitleId(String personId, String titleId){
+        Cursor cursor = database.rawQuery(" SELECT crew.category FROM crew WHERE crew.person_id = ? and crew.title_id = ?;", new String[]{personId, titleId});
+
+        String[] roles = new String[cursor.getCount()];
+        int n=0;
+        while (cursor.moveToNext()) {
+            roles[n++] = cursor.getString(cursor.getColumnIndex("category"));
+        }
+
+        return roles;
+    }
+
     private Film getFilmData(Cursor cursor) {
         return new Film(cursor.getString(cursor.getColumnIndex("title_id")),
                 cursor.getString(cursor.getColumnIndex("primary_title")),
