@@ -24,27 +24,26 @@ public class MainFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        if (view == null)
+        if (view == null) {
             view = inflater.inflate(R.layout.fragment_main, container, false);
+            DatabaseManager databaseManager = DatabaseManager.getInstance(view.getContext());
+            baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
 
-        DatabaseManager databaseManager = DatabaseManager.getInstance(view.getContext());
-        baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
+            //строка с популярными фильмами
+            Film[] popularFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
+                    "ratings.rating, ratings.votes " +
+                    "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                    "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
+                    "ORDER BY ratings.votes DESC LIMIT 7");
+            createFilmRow(popularFilms, "Popular films");
 
-        //строка с популярными фильмами
-        Film[] popularFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
-                "ratings.rating, ratings.votes " +
-                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
-                "ORDER BY ratings.votes DESC LIMIT 7");
-        createFilmRow(popularFilms, "Popular films");
-
-        //строка с приключенчискими фильмами
-        Film[] adventureFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
-                "ratings.rating, ratings.votes " +
-                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE titles.genres like '%Adventure%' LIMIT 7");
-        createFilmRow(adventureFilms, "Adventure films");
-
+            //строка с приключенчискими фильмами
+            Film[] adventureFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
+                    "ratings.rating, ratings.votes " +
+                    "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                    "WHERE titles.genres like '%Adventure%' LIMIT 7");
+            createFilmRow(adventureFilms, "Adventure films");
+        } 
         return view;
     }
 

@@ -3,6 +3,7 @@ package com.vladyslav.offlinefilmtracker.Activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -27,12 +28,14 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                FragmentManager fm = getSupportFragmentManager();
+                fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 switch (item.getItemId()) {
                     case R.id.nav_movies:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, mainFragment).commit();
+                        fm.beginTransaction().replace(R.id.main_fragment_container, mainFragment).commit();
                         break;
                     case R.id.nav_search:
-                        getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, searchFragment).commit();
+                        fm.beginTransaction().replace(R.id.main_fragment_container, searchFragment).commit();
                         break;
                 }
                 return true;
