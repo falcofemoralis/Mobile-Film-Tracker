@@ -9,9 +9,10 @@ import android.widget.TextView;
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
 
+import java.io.Serializable;
 import java.util.Arrays;
 
-public class Film {
+public class Film implements Serializable {
     private String film_id;
     private String title;
     private String rating;

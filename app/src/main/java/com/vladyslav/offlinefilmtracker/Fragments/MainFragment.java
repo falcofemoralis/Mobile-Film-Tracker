@@ -8,13 +8,10 @@ import android.view.ViewGroup;
 import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
@@ -27,19 +24,8 @@ public class MainFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        //    final View view = inflater.inflate(R.layout.fragment_main, container, false);
-        if (view == null) {
-            // Inflate the layout for this fragment
+        if (view == null)
             view = inflater.inflate(R.layout.fragment_main, container, false);
-            // Find and setup subviews
-        } else {
-            // Do not inflate the layout again.
-            // The returned View of onCreateView will be added into the fragment.
-            // However it is not allowed to be added twice even if the parent is same.
-            // So we must remove _rootView from the existing parent view group
-            // in onDestroyView() (it will be added back).
-        }
-
 
         DatabaseManager databaseManager = DatabaseManager.getInstance(view.getContext());
         baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
@@ -61,11 +47,11 @@ public class MainFragment extends Fragment {
 
         return view;
     }
+
+    //нужен для сохранения состояния фрагмента
     @Override
     public void onDestroyView() {
-        if (view.getParent() != null) {
-            ((ViewGroup)view.getParent()).removeView(view);
-        }
+        if (view.getParent() != null) ((ViewGroup) view.getParent()).removeView(view);
         super.onDestroyView();
     }
 
@@ -101,7 +87,7 @@ public class MainFragment extends Fragment {
         filmLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(new FilmFragment(film));
+                getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, FilmFragment.newInstance(film)).addToBackStack(null).commit();
             }
         });
 

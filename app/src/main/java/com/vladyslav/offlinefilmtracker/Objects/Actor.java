@@ -6,7 +6,9 @@ import android.graphics.drawable.Drawable;
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
 
-public class Actor {
+import java.io.Serializable;
+
+public class Actor implements Serializable {
     private String person_id;
     private String name;
     private String born;

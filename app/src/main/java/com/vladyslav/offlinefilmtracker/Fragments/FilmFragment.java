@@ -11,19 +11,30 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
-import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 
 public class FilmFragment extends Fragment {
-    DatabaseManager databaseManager;
-    Film film;
+    private static final String ARG_FILM = "param1";
+    private DatabaseManager databaseManager;
+    private Film film;
 
-    public FilmFragment(Film film) {
-        this.film = film;
+    public static FilmFragment newInstance(Film film) {
+        FilmFragment fragment = new FilmFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_FILM, film);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            film = (Film) getArguments().getSerializable(ARG_FILM);
+        }
     }
 
     @Override
@@ -78,6 +89,7 @@ public class FilmFragment extends Fragment {
 
         TextView writerTV = view.findViewById(R.id.fragment_film_tv_writers);
         writerTV.setText("Writers: ");
+
         for (final Actor actor : actors) {
             switch (actor.getCategory()) {
                 case "director":
@@ -101,7 +113,7 @@ public class FilmFragment extends Fragment {
                     layout.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            FragmentHelper.openFragment(new ActorFragment(actor));
+                            getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, ActorFragment.newInstance(actor)).addToBackStack(null).commit();
                         }
                     });
                     actorsLayout.addView(layout);

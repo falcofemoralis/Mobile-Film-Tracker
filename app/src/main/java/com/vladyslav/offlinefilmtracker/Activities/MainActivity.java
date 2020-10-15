@@ -6,12 +6,10 @@ import androidx.fragment.app.Fragment;
 
 import android.os.Bundle;
 import android.view.MenuItem;
-import android.view.View;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vladyslav.offlinefilmtracker.Fragments.MainFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.SearchFragment;
-import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -22,8 +20,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        FragmentHelper.init(getSupportFragmentManager());
-
         final Fragment mainFragment = new MainFragment();
         final Fragment searchFragment = new SearchFragment();
 
@@ -33,10 +29,10 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 switch (item.getItemId()) {
                     case R.id.nav_movies:
-                        FragmentHelper.replaceFragment(mainFragment);
+                        getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, mainFragment).commit();
                         break;
                     case R.id.nav_search:
-                        FragmentHelper.replaceFragment(searchFragment);
+                        getSupportFragmentManager().beginTransaction().replace(R.id.main_fragment_container, searchFragment).commit();
                         break;
                 }
                 return true;

@@ -15,18 +15,29 @@ import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
 
-import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
-import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class ActorFragment extends Fragment {
+    private static final String ARG_ACTOR = "param1";
     private Actor actor;
 
-    public ActorFragment(Actor actor) {
-        this.actor = actor;
+    public static ActorFragment newInstance(Actor actor) {
+        ActorFragment fragment = new ActorFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_ACTOR, actor);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            actor = (Actor) getArguments().getSerializable(ARG_ACTOR);
+        }
     }
 
     @Override
@@ -82,11 +93,11 @@ public class ActorFragment extends Fragment {
             ((TextView) filmLayout.getChildAt(2)).setText(films[i].getRating());
 
             //добавляем в строку
-            final int finalI = i;
+            final Film film = films[i];
             filmLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    FragmentHelper.openFragment(new FilmFragment(films[finalI]));
+                    getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, FilmFragment.newInstance(film)).addToBackStack(null).commit();
                 }
             });
             rowSubject.addView(filmLayout);
