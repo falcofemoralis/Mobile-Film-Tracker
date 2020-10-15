@@ -14,13 +14,15 @@ import com.vladyslav.offlinefilmtracker.Fragments.SearchFragment;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class MainActivity extends AppCompatActivity {
-    BottomNavigationView bottomNavigationView;
+    private BottomNavigationView bottomNavigationView;
+    private FragmentManager fm;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        fm = getSupportFragmentManager();
         final Fragment mainFragment = new MainFragment();
         final Fragment searchFragment = new SearchFragment();
 
@@ -28,7 +30,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                FragmentManager fm = getSupportFragmentManager();
                 fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 switch (item.getItemId()) {
                     case R.id.nav_movies:

@@ -30,20 +30,13 @@ public class MainFragment extends Fragment {
             baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
 
             //строка с популярными фильмами
-            Film[] popularFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
-                    "ratings.rating, ratings.votes " +
-                    "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                    "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
-                    "ORDER BY ratings.votes DESC LIMIT 7");
-            createFilmRow(popularFilms, "Popular films");
+            createFilmRow(databaseManager.getPopularFilms(), "Popular films");
 
-            //строка с приключенчискими фильмами
-            Film[] adventureFilms = databaseManager.getFilmsByQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
-                    "ratings.rating, ratings.votes " +
-                    "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                    "WHERE titles.genres like '%Adventure%' LIMIT 7");
-            createFilmRow(adventureFilms, "Adventure films");
-        } 
+            //создаем строки с указанными жанрами
+            String[] genres = new String[]{"Action", "Sci-Fi", "Fantasy", "Comedy", "Animation"};
+            for (String genre : genres)
+                createFilmRow(databaseManager.getFilmsByGenre(genre), genre + " films");
+        }
         return view;
     }
 

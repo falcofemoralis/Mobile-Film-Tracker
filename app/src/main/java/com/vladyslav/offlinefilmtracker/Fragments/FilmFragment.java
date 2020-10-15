@@ -1,9 +1,16 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
+import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.TextPaint;
+import android.text.method.LinkMovementMethod;
+import android.text.style.ClickableSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,10 +23,13 @@ import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 
+import java.util.ArrayList;
+
 public class FilmFragment extends Fragment {
     private static final String ARG_FILM = "param1";
     private DatabaseManager databaseManager;
     private Film film;
+    private View view;
 
     public static FilmFragment newInstance(Film film) {
         FilmFragment fragment = new FilmFragment();
@@ -39,16 +49,16 @@ public class FilmFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_film, container, false);
+        view = inflater.inflate(R.layout.fragment_film, container, false);
         databaseManager = DatabaseManager.getInstance(view.getContext());
-        setBaseFilmInfo(view);
-        setAdditionalFilmInfo(view);
-        setCrew(view);
+        setBaseFilmInfo();
+        setAdditionalFilmInfo();
+        setCrew();
         return view;
     }
 
     //устанавливаем основную информацию про фильм
-    private void setBaseFilmInfo(View view) {
+    private void setBaseFilmInfo() {
         //устанавливаем основную информацию
         ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(film.getRating() + "\n(" + film.getVotes() + ")");
         ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(film.getTitle());
@@ -65,7 +75,7 @@ public class FilmFragment extends Fragment {
     }
 
     //устанавливаем допольнительную информацию про фильм
-    private void setAdditionalFilmInfo(View view) {
+    private void setAdditionalFilmInfo() {
         ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText("Release date" + ": " + film.getPremiered());
         ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText("Runtime" + ": " + film.getRuntime_minutes() + " minutes");
 
@@ -77,29 +87,33 @@ public class FilmFragment extends Fragment {
     }
 
     //устанавливем комманду
-    private void setCrew(View view) {
+    private void setCrew() {
         Actor[] actors = databaseManager.getActorsByTitleId(film.getFilm_id());
         LinearLayout actorsLayout = view.findViewById(R.id.fragment_film_ll_actorsLayout);
 
+        //TODO упростить код
+        ArrayList<SpannableString> directorsClickable = new ArrayList<>();
         TextView directorTV = view.findViewById(R.id.fragment_film_tv_directors);
         directorTV.setText("Director: ");
 
+        ArrayList<SpannableString> producerClickable = new ArrayList<>();
         TextView producerTV = view.findViewById(R.id.fragment_film_tv_producers);
         producerTV.setText("Producers: ");
 
+        ArrayList<SpannableString> writersClickable = new ArrayList<>();
         TextView writerTV = view.findViewById(R.id.fragment_film_tv_writers);
         writerTV.setText("Writers: ");
 
         for (final Actor actor : actors) {
             switch (actor.getCategory()) {
                 case "director":
-                    directorTV.append(actor.getName() + " ");
+                    directorsClickable.add(setClickableActorName(directorTV, actor));
                     break;
                 case "producer":
-                    producerTV.append(actor.getName() + " ");
+                    producerClickable.add(setClickableActorName(producerTV, actor));
                     break;
                 case "writer":
-                    writerTV.append(actor.getName() + " ");
+                    writersClickable.add(setClickableActorName(writerTV, actor));
                     break;
                 default:
                     LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
@@ -119,5 +133,39 @@ public class FilmFragment extends Fragment {
                     actorsLayout.addView(layout);
             }
         }
+
+        for(int i=0;i<directorsClickable.size();i++){
+            directorTV.append(directorsClickable.get(i));
+            if(i!=directorsClickable.size()-1) directorTV.append(", ");
+        }
+
+        for(int i=0;i<producerClickable.size();i++){
+            producerTV.append(producerClickable.get(i));
+            if(i!=producerClickable.size()-1) producerTV.append(", ");
+        }
+
+        for(int i=0;i<writersClickable.size();i++){
+            writerTV.append(writersClickable.get(i));
+            if(i!=writersClickable.size()-1) writerTV.append(", ");
+        }
+    }
+
+
+    private SpannableString setClickableActorName(TextView textView, final Actor actor){
+        SpannableString ss = new SpannableString(actor.getName());
+        ClickableSpan clickableSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View textView) {
+                getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, ActorFragment.newInstance(actor)).addToBackStack(null).commit();
+            }
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setUnderlineText(false);
+            }
+        };
+        ss.setSpan(clickableSpan, 0, ss.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        textView.setMovementMethod(LinkMovementMethod.getInstance());
+        return ss;
     }
 }

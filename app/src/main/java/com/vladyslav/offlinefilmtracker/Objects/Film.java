@@ -2,13 +2,8 @@ package com.vladyslav.offlinefilmtracker.Objects;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.view.LayoutInflater;
-import android.widget.LinearLayout;
-import android.widget.TextView;
-
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
-
 import java.io.Serializable;
 import java.util.Arrays;
 

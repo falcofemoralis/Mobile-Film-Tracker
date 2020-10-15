@@ -37,8 +37,27 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    public Film[] getFilmsByQuery(String query) {
-        Cursor cursor = database.rawQuery(query, null);
+    public Film[] getPopularFilms() {
+        Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
+                "ratings.rating, ratings.votes " +
+                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
+                "ORDER BY ratings.votes DESC LIMIT 7", null);
+        Film[] film = new Film[cursor.getCount()];
+        int n = 0;
+        while (cursor.moveToNext())
+            film[n++] = getFilmData(cursor);
+
+        cursor.close();
+        return film;
+    }
+
+    public Film[] getFilmsByGenre(String genre) {
+        String genreParam = "%" + genre + "%";
+        Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
+                "ratings.rating, ratings.votes " +
+                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                "WHERE titles.genres like ? AND titles.premiered > 2015 LIMIT 7", new String[]{genreParam});
         Film[] film = new Film[cursor.getCount()];
         int n = 0;
         while (cursor.moveToNext())
