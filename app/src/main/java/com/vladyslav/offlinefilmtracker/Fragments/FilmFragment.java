@@ -59,7 +59,7 @@ public class FilmFragment extends Fragment {
     }
 
     //устанавливаем основную информацию про фильм
-    private void setBaseFilmInfo() {
+    public void setBaseFilmInfo() {
         //устанавливаем основную информацию
         ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(film.getRating() + "\n(" + film.getVotes() + ")");
         ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(film.getTitle());
@@ -76,7 +76,7 @@ public class FilmFragment extends Fragment {
     }
 
     //устанавливаем допольнительную информацию про фильм
-    private void setAdditionalFilmInfo() {
+    public void setAdditionalFilmInfo() {
         ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText("Release date" + ": " + film.getPremiered());
         ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText("Runtime" + ": " + film.getRuntime_minutes() + " minutes");
 
@@ -88,7 +88,7 @@ public class FilmFragment extends Fragment {
     }
 
     //устанавливем комманду
-    private void setCrew() {
+    public void setCrew() {
         Actor[] actors = databaseManager.getActorsByTitleId(film.getFilm_id());
         LinearLayout actorsLayout = view.findViewById(R.id.fragment_film_ll_actorsLayout);
 
@@ -98,7 +98,6 @@ public class FilmFragment extends Fragment {
             personsStrings.add(list);
         }
 
-        //TODO уменьшить код
         ArrayList<TextView> personsTextViews = new ArrayList<>();
         personsTextViews.add((TextView) view.findViewById(R.id.fragment_film_tv_directors));
         personsTextViews.get(0).setText("Director: ");

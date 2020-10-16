@@ -52,12 +52,12 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return film;
     }
 
-    public Film[] getFilmsByGenre(String genre) {
+    public Film[] getFilmsByGenreLimited(String genre, int limit) {
         String genreParam = "%" + genre + "%";
         Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
                 "ratings.rating, ratings.votes " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE titles.genres like ? AND titles.premiered > 2015 LIMIT 7", new String[]{genreParam});
+                "WHERE titles.genres like ? AND titles.premiered > 2015 LIMIT ?", new String[]{genreParam, String.valueOf(limit)});
         Film[] film = new Film[cursor.getCount()];
         int n = 0;
         while (cursor.moveToNext())
@@ -65,6 +65,16 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
         cursor.close();
         return film;
+    }
+
+    public Cursor getFilmsByGenre(String genre) {
+        String genreParam = "%" + genre + "%";
+        Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
+                "ratings.rating, ratings.votes " +
+                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                "WHERE titles.genres like ? " +
+                "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{genreParam});
+        return cursor;
     }
 
     public Actor[] getActorsByTitleId(String titleId) {
@@ -101,11 +111,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return films;
     }
 
-    public String[] getRoleByTitleId(String personId, String titleId){
+    public String[] getRoleByTitleId(String personId, String titleId) {
         Cursor cursor = database.rawQuery(" SELECT crew.category FROM crew WHERE crew.person_id = ? and crew.title_id = ?;", new String[]{personId, titleId});
 
         String[] roles = new String[cursor.getCount()];
-        int n=0;
+        int n = 0;
         while (cursor.moveToNext()) {
             roles[n++] = cursor.getString(cursor.getColumnIndex("category"));
         }
@@ -113,7 +123,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return roles;
     }
 
-    private Film getFilmData(Cursor cursor) {
+    public Film getFilmData(Cursor cursor) {
         return new Film(cursor.getString(cursor.getColumnIndex("title_id")),
                 cursor.getString(cursor.getColumnIndex("primary_title")),
                 cursor.getString(cursor.getColumnIndex("rating")),

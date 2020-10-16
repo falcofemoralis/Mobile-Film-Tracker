@@ -30,12 +30,12 @@ public class MainFragment extends Fragment {
             baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
 
             //строка с популярными фильмами
-            createFilmRow(databaseManager.getPopularFilms(), "Popular films");
+            createFilmRow(databaseManager.getPopularFilms(), "Popular");
 
             //создаем строки с указанными жанрами
             String[] genres = new String[]{"Action", "Sci-Fi", "Fantasy", "Comedy", "Animation"};
             for (String genre : genres)
-                createFilmRow(databaseManager.getFilmsByGenre(genre), genre + " films");
+                createFilmRow(databaseManager.getFilmsByGenreLimited(genre, FILMS_IN_ROW), genre);
         }
         return view;
     }
@@ -48,13 +48,13 @@ public class MainFragment extends Fragment {
     }
 
     //создаем строку с фильмами
-    private void createFilmRow(Film[] films, String rowName) {
+    public void createFilmRow(Film[] films, String genre) {
         LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //колонка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(rowName); //устанавливаем заголовок колонки
+        ((TextView) filmsLayout.getChildAt(0)).setText(genre + " films"); //устанавливаем заголовок колонки
         LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         for (int i = 0; i < FILMS_IN_ROW; i++)
             addFilm(films[i], linearLayout);
-
+        if (genre != "Popular") addMoreBtn(linearLayout, genre);
         baseLayout.addView(filmsLayout); //добавляем в корень
     }
 
@@ -84,5 +84,16 @@ public class MainFragment extends Fragment {
         });
 
         layout.addView(filmLayout);
+    }
+
+    private void addMoreBtn(LinearLayout linearLayout, final String genre) {
+        LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
+        ((ImageView) layout.getChildAt(0)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, CategoryFragment.newInstance(genre)).addToBackStack(null).commit();
+            }
+        });
+        linearLayout.addView(layout);
     }
 }

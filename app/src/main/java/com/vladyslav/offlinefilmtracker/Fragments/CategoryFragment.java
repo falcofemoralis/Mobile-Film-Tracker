@@ -1,37 +1,45 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.material.button.MaterialButton;
+import com.vladyslav.offlinefilmtracker.Activities.MainActivity;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
-import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
 
-public class ActorFragment extends Fragment {
-    private static final String ARG_ACTOR = "param1";
-    private Actor actor;
+public class CategoryFragment extends Fragment {
+    private static final String ARG_GENRE = "param1";
+    private String genre;
     private View view;
-    private LinearLayout filmsLayout;
+    private LinearLayout baseLayout, filmsLayout;
+    private NestedScrollView scrollView;
+    private Cursor filmsCursor;
 
-    public static ActorFragment newInstance(Actor actor) {
-        ActorFragment fragment = new ActorFragment();
+    public static CategoryFragment newInstance(String genre) {
+        CategoryFragment fragment = new CategoryFragment();
         Bundle args = new Bundle();
-        args.putSerializable(ARG_ACTOR, actor);
+        args.putString(ARG_GENRE, genre);
         fragment.setArguments(args);
         return fragment;
     }
@@ -40,76 +48,61 @@ public class ActorFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            actor = (Actor) getArguments().getSerializable(ARG_ACTOR);
+            genre = getArguments().getString(ARG_GENRE);
         }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_actor, container, false);
-        filmsLayout = view.findViewById(R.id.fragment_actor_films_ll_films);
-        setActorBaseInfo();
-        setFilmsTables();
+        view = inflater.inflate(R.layout.fragment_category, container, false);
+
+        //получаем необходиміе лаяуты
+        scrollView = getActivity().findViewById(R.id.nestedScrollView);
+        baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
+        filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
+
+        //получаем фильмы и устанавливаем первые 9
+        filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(genre);
+        ((TextView) filmsLayout.getChildAt(0)).setText(genre + " films");
+        baseLayout.addView(filmsLayout);
+        setFilms();
+        scrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                //вычесляем разницу
+                View view = (View) scrollView.getChildAt(scrollView.getChildCount() - 1);
+                int diff = (view.getBottom() - (scrollView.getHeight() + scrollView.getScrollY()));
+
+                //если мы опустились в самый конец
+                if (diff == 0) setFilms();
+            }
+        });
+
         return view;
     }
 
-    //устанавливаем базовую информацию актеру
-    public void setActorBaseInfo() {
-        ((TextView) view.findViewById(R.id.fragment_actor_films_tv_name)).setText(actor.getName());
-        ((ImageView) view.findViewById(R.id.fragment_actor_films_iv_photo)).setImageDrawable(actor.getPhoto(getContext()));
-        ((TextView) view.findViewById(R.id.fragment_actor_films_tv_born)).setText("Born: " + actor.getBorn());
-        ((TextView) view.findViewById(R.id.fragment_actor_films_tv_died)).setText("Died: " + actor.getDied());
+    @Override
+    public void onDestroy() {
+        scrollView.setOnScrollChangeListener((NestedScrollView.OnScrollChangeListener) null);
+        super.onDestroy();
     }
 
-    //сортируем фильмы по роли
-    public void setFilmsTables() {
-        //получение всех фильмов акетера
-        Film[] films = DatabaseManager.getInstance(getContext()).getFilmsByPersonId(actor.getPerson_id());
+    //устанавливаем фильмы в количестве 9 штук
+    private void setFilms() {
+        TableLayout tableLayout = (TableLayout) filmsLayout.getChildAt(1);
 
-        //распределяем фильмы в зависимости от роли
-        ArrayList<ArrayList<Film>> filmByRoles = new ArrayList<>();
-        for (int i = 0; i < 4; ++i) {
-            ArrayList<Film> list = new ArrayList<>();
-            filmByRoles.add(list);
+        Film[] films = new Film[9];
+
+        for (int i = 0; i < 9; i++) {
+            if (filmsCursor.moveToNext())
+                films[i] = DatabaseManager.getInstance(getContext()).getFilmData(filmsCursor);
+            else
+                break;
         }
 
-        for (Film film : films) {
-            String[] roles = DatabaseManager.getInstance(getContext()).getRoleByTitleId(actor.getPerson_id(), film.getFilm_id());
-            int n;
-            for (String role : roles) {
-                switch (role) {
-                    case "director":
-                        n = 1;
-                        break;
-                    case "producer":
-                        n = 2;
-                        break;
-                    case "writer":
-                        n = 3;
-                        break;
-                    default:
-                        n = 0;
-                }
-                filmByRoles.get(n).add(film);
-            }
-        }
-
-        String[] roles = new String[]{"Actor", "Director", "Producer", "Writer"};
-        for (int i = 0; i < filmByRoles.size(); ++i) {
-            if (filmByRoles.get(i).size() != 0) {
-                LinearLayout linearLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
-                ((TextView) linearLayout.getChildAt(0)).setText(roles[i]);
-                setFilms(filmByRoles.get(i), (TableLayout) linearLayout.getChildAt(1));
-                filmsLayout.addView(linearLayout);
-            }
-        }
-    }
-
-    //устанавливаем фильмы актеру
-    private void setFilms(ArrayList<Film> films, TableLayout tableLayout) {
         //необходимые переменные
         TableRow rowSubject = null;
-        int size = films.size();
+        int size = films.length;
 
         for (int i = 0; i < size; ++i) {
             // В одном ряду может быть лишь 3 кнопки, если уже три созданы, создается следующая колонка
@@ -127,16 +120,16 @@ public class ActorFragment extends Fragment {
 
             //устанавлиавем постер
             ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-            Drawable poster = films.get(i).getPoster(getContext());
+            Drawable poster = films[i].getPoster(getContext());
             filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * 2.5f), (int) (poster.getIntrinsicHeight() * 2.5f)));
             filmPoster.setImageDrawable(poster);
 
             //устанавливаем базовую информацию
-            ((TextView) filmLayout.getChildAt(1)).setText(films.get(i).getTitle());
-            ((TextView) filmLayout.getChildAt(2)).setText(films.get(i).getRating());
+            ((TextView) filmLayout.getChildAt(1)).setText(films[i].getTitle());
+            ((TextView) filmLayout.getChildAt(2)).setText(films[i].getRating());
 
             //добавляем в строку
-            final Film film = films.get(i);
+            final Film film = films[i];
             filmLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
