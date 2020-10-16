@@ -29,7 +29,7 @@ public class ResourcesManager {
     }
 
     public ResourcesManager(Context context) {
-      //  String obbFilePath = context.getObbDir().getPath() + "/main.1.com.vladyslav.offlinefilmtracker.obb";
+        //  String obbFilePath = context.getObbDir().getPath() + "/main.1.com.vladyslav.offlinefilmtracker.obb";
         String obbFilePath = context.getObbDir().getPath();
         try {
             photosZip = new ZipResourceFile(obbFilePath + "/photos.zip");
@@ -39,6 +39,7 @@ public class ResourcesManager {
         }
     }
 
+    //получение постера по id фильма
     public Drawable getPosterByTitleId(String fileName) {
         InputStream fileStream;
         try {
@@ -50,6 +51,7 @@ public class ResourcesManager {
         return Drawable.createFromStream(fileStream, null);
     }
 
+    //получение фотографии по id актера
     public Drawable getPhotoByPersonId(String fileName) {
         InputStream fileStream;
         try {

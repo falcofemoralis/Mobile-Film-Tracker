@@ -7,26 +7,28 @@ import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.Serializable;
+import java.util.Arrays;
 
 public class Actor implements Serializable {
-    private String person_id;
-    private String name;
-    private String born;
-    private String died;
+    private String person_id, name, born, died, category;
     private String[] characters;
-    private String category;
 
     public Actor(String person_id, String name, String born, String died, String characters, String category) {
         this.person_id = person_id;
         this.name = name;
-        if(born == null) born = "unknown";
+        this.category = category;
+
+        //в случае если неизвестна дата рождения
+        if (born == null) born = "unknown";
         this.born = born;
-        if(died == null) died = "alive";
+
+        //если актер еще жив
+        if (died == null) died = "alive";
         this.died = died;
+
+        //т.к данные приходят в формате ["",""], то их нужно разделить
         characters = characters.trim();
         this.characters = characters.substring(1, characters.length() - 1).trim().split("\\s*,\\s*");
-        ;
-        this.category = category;
     }
 
     public String getPerson_id() {
@@ -54,8 +56,8 @@ public class Actor implements Serializable {
     }
 
     public Drawable getPhoto(Context context) {
-        Drawable drawable =  ResourcesManager.getInstance(context).getPhotoByPersonId(person_id);
-        if(drawable == null) drawable = context.getDrawable(R.drawable.noimage_photo);
+        Drawable drawable = ResourcesManager.getInstance(context).getPhotoByPersonId(person_id);
+        if (drawable == null) drawable = context.getDrawable(R.drawable.noimage_photo);
         return drawable;
     }
 
@@ -66,7 +68,7 @@ public class Actor implements Serializable {
                 ", name='" + name + '\'' +
                 ", born='" + born + '\'' +
                 ", died='" + died + '\'' +
-                ", characters='" + characters + '\'' +
+                ", characters=" + Arrays.toString(characters) +
                 ", category='" + category + '\'' +
                 '}';
     }

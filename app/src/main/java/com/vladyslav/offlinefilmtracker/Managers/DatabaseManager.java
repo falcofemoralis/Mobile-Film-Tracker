@@ -37,12 +37,13 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
     }
 
-    public Film[] getPopularFilms() {
+    //получение популярных фильмов
+    public Film[] getPopularFilmsLimited(int limit) {
         Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
                 "ratings.rating, ratings.votes " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
-                "ORDER BY ratings.votes DESC LIMIT 7", null);
+                "ORDER BY ratings.votes DESC LIMIT ?", new String[]{String.valueOf(limit)});
         Film[] film = new Film[cursor.getCount()];
         int n = 0;
         while (cursor.moveToNext())
@@ -52,12 +53,13 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return film;
     }
 
-    public Film[] getFilmsByGenreLimited(String genre, int limit) {
+    //получаем фильмов по жанру и году с ограничением
+    public Film[] getFilmsByGenreLimited(String genre, int premiered, int limit) {
         String genreParam = "%" + genre + "%";
         Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
                 "ratings.rating, ratings.votes " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE titles.genres like ? AND titles.premiered > 2015 LIMIT ?", new String[]{genreParam, String.valueOf(limit)});
+                "WHERE titles.genres like ? AND titles.premiered > ? LIMIT ?", new String[]{genreParam, String.valueOf(premiered), String.valueOf(limit)});
         Film[] film = new Film[cursor.getCount()];
         int n = 0;
         while (cursor.moveToNext())
@@ -67,6 +69,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return film;
     }
 
+    //получение фильмов по жанру
     public Cursor getFilmsByGenre(String genre) {
         String genreParam = "%" + genre + "%";
         Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, " +
@@ -77,6 +80,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return cursor;
     }
 
+    //получение актеров в фильме
     public Actor[] getActorsByTitleId(String titleId) {
         Cursor cursor = database.rawQuery("SELECT people.person_id, people.name, people.born, people.died, crew.characters, crew.category " +
                 "FROM crew INNER JOIN people ON people.person_id = crew.person_id " +
@@ -96,6 +100,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return actors;
     }
 
+    //получением фильмов актера
     public Film[] getFilmsByPersonId(String personId) {
         Cursor cursor = database.rawQuery("SELECT DISTINCT crew.title_id FROM crew WHERE crew.person_id = ?", new String[]{personId});
         Film[] films = new Film[cursor.getCount()];
@@ -111,7 +116,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return films;
     }
 
-    public String[] getRoleByTitleId(String personId, String titleId) {
+    //получение роли в фильме по актеру и фильму
+    public String[] getRoleByPersonAndTitleId(String personId, String titleId) {
         Cursor cursor = database.rawQuery(" SELECT crew.category FROM crew WHERE crew.person_id = ? and crew.title_id = ?;", new String[]{personId, titleId});
 
         String[] roles = new String[cursor.getCount()];
@@ -123,6 +129,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return roles;
     }
 
+    //конвертирование курсора в объект фильма
     public Film getFilmData(Cursor cursor) {
         return new Film(cursor.getString(cursor.getColumnIndex("title_id")),
                 cursor.getString(cursor.getColumnIndex("primary_title")),

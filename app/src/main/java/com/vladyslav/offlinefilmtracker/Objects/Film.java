@@ -2,18 +2,15 @@ package com.vladyslav.offlinefilmtracker.Objects;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
+
 import java.io.Serializable;
 import java.util.Arrays;
 
 public class Film implements Serializable {
-    private String film_id;
-    private String title;
-    private String rating;
-    private String votes;
-    private String runtime_minutes;
-    private String premiered;
+    private String film_id, title, rating, votes, runtime_minutes, premiered;
     private boolean isAdult;
     private String[] genres;
 
@@ -46,7 +43,7 @@ public class Film implements Serializable {
 
     public Drawable getPoster(Context context) {
         Drawable drawable = ResourcesManager.getInstance(context).getPosterByTitleId(film_id);
-        if(drawable == null) drawable = context.getDrawable(R.drawable.noimage_poster);
+        if (drawable == null) drawable = context.getDrawable(R.drawable.noimage_poster);
         return drawable;
     }
 

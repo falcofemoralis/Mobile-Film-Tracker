@@ -1,7 +1,5 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -153,7 +151,7 @@ public class FilmFragment extends Fragment {
         actorsLayout.addView(layout);
     }
 
-    //установка перехода по нажатию на имя режисера
+    //установка перехода по нажатию на имя режисера, сценариста, продюсера
     private SpannableString setClickableActorName(TextView textView, final Actor actor) {
         SpannableString ss = new SpannableString(actor.getName());
         ClickableSpan clickableSpan = new ClickableSpan() {

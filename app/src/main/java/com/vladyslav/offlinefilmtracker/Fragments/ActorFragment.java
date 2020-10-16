@@ -74,7 +74,7 @@ public class ActorFragment extends Fragment {
         }
 
         for (Film film : films) {
-            String[] roles = DatabaseManager.getInstance(getContext()).getRoleByTitleId(actor.getPerson_id(), film.getFilm_id());
+            String[] roles = DatabaseManager.getInstance(getContext()).getRoleByPersonAndTitleId(actor.getPerson_id(), film.getFilm_id());
             int n;
             for (String role : roles) {
                 switch (role) {

@@ -30,12 +30,12 @@ public class MainFragment extends Fragment {
             baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
 
             //строка с популярными фильмами
-            createFilmRow(databaseManager.getPopularFilms(), "Popular");
+            createFilmRow(databaseManager.getPopularFilmsLimited(FILMS_IN_ROW), "Popular");
 
             //создаем строки с указанными жанрами
             String[] genres = new String[]{"Action", "Sci-Fi", "Fantasy", "Comedy", "Animation"};
             for (String genre : genres)
-                createFilmRow(databaseManager.getFilmsByGenreLimited(genre, FILMS_IN_ROW), genre);
+                createFilmRow(databaseManager.getFilmsByGenreLimited(genre, 2015, FILMS_IN_ROW), genre);
         }
         return view;
     }
@@ -86,6 +86,7 @@ public class MainFragment extends Fragment {
         layout.addView(filmLayout);
     }
 
+    //добавляем кнопку открытия всех фильмов по категории
     private void addMoreBtn(LinearLayout linearLayout, final String genre) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
         ((ImageView) layout.getChildAt(0)).setOnClickListener(new View.OnClickListener() {

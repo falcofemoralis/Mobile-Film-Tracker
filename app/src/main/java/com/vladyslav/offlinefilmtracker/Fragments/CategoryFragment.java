@@ -31,8 +31,7 @@ import java.util.ArrayList;
 public class CategoryFragment extends Fragment {
     private static final String ARG_GENRE = "param1";
     private String genre;
-    private View view;
-    private LinearLayout baseLayout, filmsLayout;
+    private LinearLayout filmsLayout;
     private NestedScrollView scrollView;
     private Cursor filmsCursor;
 
@@ -54,11 +53,11 @@ public class CategoryFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_category, container, false);
+        View view = inflater.inflate(R.layout.fragment_category, container, false);
 
-        //получаем необходиміе лаяуты
+        //получаем необходимые лаяуты
         scrollView = getActivity().findViewById(R.id.nestedScrollView);
-        baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
+        LinearLayout baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
         filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
 
         //получаем фильмы и устанавливаем первые 9
