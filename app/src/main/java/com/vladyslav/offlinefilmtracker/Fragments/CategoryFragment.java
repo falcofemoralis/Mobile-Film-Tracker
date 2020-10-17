@@ -32,7 +32,7 @@ import java.util.ArrayList;
 public class CategoryFragment extends Fragment {
     private static final String ARG_GENRE = "param1";
     private String genre;
-    private LinearLayout filmsLayout;
+    private View view;
     private NestedScrollView scrollView;
     private Cursor filmsCursor;
 
@@ -54,30 +54,9 @@ public class CategoryFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fragment_category, container, false);
-
-        //получаем необходимые лаяуты
+        view = inflater.inflate(R.layout.fragment_category, container, false);
         scrollView = getActivity().findViewById(R.id.nestedScrollView);
-        LinearLayout baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
-        filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
-
-        //получаем фильмы и устанавливаем первые 9
-        filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(genre);
-        ((TextView) filmsLayout.getChildAt(0)).setText(genre + " films");
-        baseLayout.addView(filmsLayout);
-        setFilms();
-        scrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
-            @Override
-            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-                //вычесляем разницу
-                View view = (View) scrollView.getChildAt(scrollView.getChildCount() - 1);
-                int diff = (view.getBottom() - (scrollView.getHeight() + scrollView.getScrollY()));
-
-                //если мы опустились в самый конец
-                if (diff == 0) setFilms();
-            }
-        });
-
+        setFilmsTables();
         return view;
     }
 
@@ -87,8 +66,38 @@ public class CategoryFragment extends Fragment {
         super.onDestroy();
     }
 
+    //создаем таблицу фильмов
+    public void setFilmsTables() {
+        //получаем необходимые лаяуты
+        final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
+        LinearLayout baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
+
+        //получаем фильмы и устанавливаем первые 9
+        ((TextView) filmsLayout.getChildAt(0)).setText(genre + " films");
+        filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(genre);
+        setFilms(filmsLayout);
+
+        //добавляем в базовый лаяут
+        baseLayout.addView(filmsLayout);
+
+        //при прокрутке в низ, будет установленно 9 фильмов
+        scrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
+            @Override
+            public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
+                //вычесляем разницу
+                View view = (View) scrollView.getChildAt(scrollView.getChildCount() - 1);
+                int diff = (view.getBottom() - (scrollView.getHeight() + scrollView.getScrollY()));
+
+                //если мы опустились в самый низ
+                if (diff == 0) setFilms(filmsLayout);
+            }
+        });
+
+
+    }
+
     //устанавливаем фильмы в количестве 9 штук
-    private void setFilms() {
+    public void setFilms(LinearLayout filmsLayout) {
         TableLayout tableLayout = (TableLayout) filmsLayout.getChildAt(1);
 
         ArrayList<Film> films = new ArrayList<>();

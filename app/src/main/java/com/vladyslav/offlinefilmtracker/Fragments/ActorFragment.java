@@ -108,7 +108,7 @@ public class ActorFragment extends Fragment {
     }
 
     //устанавливаем фильмы актеру
-    private void setFilms(ArrayList<Film> films, TableLayout tableLayout) {
+    public void setFilms(ArrayList<Film> films, TableLayout tableLayout) {
         //необходимые переменные
         TableRow rowSubject = null;
         int size = films.size();

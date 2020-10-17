@@ -2,7 +2,6 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.os.Bundle;
 
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import android.text.SpannableString;
@@ -10,8 +9,6 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
-import android.transition.TransitionInflater;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -137,7 +134,7 @@ public class FilmFragment extends Fragment {
     }
 
     //установка актера в колонку Crew
-    private void setActor(final Actor actor, LinearLayout actorsLayout) {
+    public void setActor(final Actor actor, LinearLayout actorsLayout) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
         ((ImageView) layout.getChildAt(0)).setImageDrawable(actor.getPhoto(getContext()));
         ((TextView) layout.getChildAt(1)).setText(actor.getName());
@@ -155,7 +152,7 @@ public class FilmFragment extends Fragment {
     }
 
     //установка перехода по нажатию на имя режисера, сценариста, продюсера
-    private SpannableString setClickableActorName(TextView textView, final Actor actor) {
+    public SpannableString setClickableActorName(TextView textView, final Actor actor) {
         SpannableString ss = new SpannableString(actor.getName());
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override

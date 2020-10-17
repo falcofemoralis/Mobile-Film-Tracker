@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +12,7 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
-
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
@@ -62,11 +58,11 @@ public class MainFragment extends Fragment {
                     msg.setData(bundle);
                     handlerPopularFilms.sendMessage(msg);
 
-                    String[] genres = new String[]{"Action", "Sci-Fi", "Fantasy", "Comedy", "Animation"};
+                    String[] genres = new String[]{"Action", "Fantasy", "Comedy", "Animation"};
                     for (String genre : genres) {
                         Message msg2 = handlerFilms.obtainMessage();
                         Bundle bundle2 = new Bundle();
-                        bundle2.putSerializable("film", databaseManager.getFilmsByGenreLimited(genre, 2015, FILMS_IN_ROW));
+                        bundle2.putSerializable("film", databaseManager.getFilmsByGenreLimited(genre, 2010, FILMS_IN_ROW));
                         bundle2.putString("genre", genre);
                         msg2.setData(bundle2);
                         handlerFilms.sendMessage(msg2);
@@ -97,7 +93,7 @@ public class MainFragment extends Fragment {
     }
 
     //добавление нового фильма в указанный лаяут
-    private void addFilm(final Film film, LinearLayout layout) {
+    public void addFilm(final Film film, LinearLayout layout) {
         //получаем постер
         Drawable poster = film.getPoster(getContext());
 
@@ -125,7 +121,7 @@ public class MainFragment extends Fragment {
     }
 
     //добавляем кнопку открытия всех фильмов по категории
-    private void addMoreBtn(LinearLayout linearLayout, final String genre) {
+    public void addMoreBtn(LinearLayout linearLayout, final String genre) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
         ((ImageView) layout.getChildAt(0)).setOnClickListener(new View.OnClickListener() {
             @Override
