@@ -2,6 +2,7 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.os.Bundle;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import android.text.SpannableString;
@@ -9,6 +10,7 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.transition.TransitionInflater;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
+import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
@@ -145,7 +148,7 @@ public class FilmFragment extends Fragment {
         layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, ActorFragment.newInstance(actor)).addToBackStack(null).commit();
+                FragmentHelper.openFragment(getFragmentManager(), getActivity(), ActorFragment.newInstance(actor));
             }
         });
         actorsLayout.addView(layout);
@@ -157,7 +160,7 @@ public class FilmFragment extends Fragment {
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View textView) {
-                getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, ActorFragment.newInstance(actor)).addToBackStack(null).commit();
+                FragmentHelper.openFragment(getFragmentManager(), getActivity(), ActorFragment.newInstance(actor));
             }
 
             @Override

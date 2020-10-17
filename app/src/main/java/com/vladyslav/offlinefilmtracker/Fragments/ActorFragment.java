@@ -3,6 +3,7 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import android.view.Gravity;
@@ -16,6 +17,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
+import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
@@ -140,7 +142,7 @@ public class ActorFragment extends Fragment {
             filmLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, FilmFragment.newInstance(film)).addToBackStack(null).commit();
+                    FragmentHelper.openFragment(getFragmentManager(), getActivity(), FilmFragment.newInstance(film));
                 }
             });
             rowSubject.addView(filmLayout);

@@ -23,6 +23,7 @@ import android.widget.Toast;
 import com.google.android.material.button.MaterialButton;
 import com.vladyslav.offlinefilmtracker.Activities.MainActivity;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
+import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
@@ -90,18 +91,18 @@ public class CategoryFragment extends Fragment {
     private void setFilms() {
         TableLayout tableLayout = (TableLayout) filmsLayout.getChildAt(1);
 
-        Film[] films = new Film[9];
+        ArrayList<Film> films = new ArrayList<>();
 
         for (int i = 0; i < 9; i++) {
             if (filmsCursor.moveToNext())
-                films[i] = DatabaseManager.getInstance(getContext()).getFilmData(filmsCursor);
+                films.add(DatabaseManager.getInstance(getContext()).getFilmData(filmsCursor));
             else
                 break;
         }
 
         //необходимые переменные
         TableRow rowSubject = null;
-        int size = films.length;
+        int size = films.size();
 
         for (int i = 0; i < size; ++i) {
             // В одном ряду может быть лишь 3 кнопки, если уже три созданы, создается следующая колонка
@@ -119,20 +120,20 @@ public class CategoryFragment extends Fragment {
 
             //устанавлиавем постер
             ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-            Drawable poster = films[i].getPoster(getContext());
+            Drawable poster = films.get(i).getPoster(getContext());
             filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * 2.5f), (int) (poster.getIntrinsicHeight() * 2.5f)));
             filmPoster.setImageDrawable(poster);
 
             //устанавливаем базовую информацию
-            ((TextView) filmLayout.getChildAt(1)).setText(films[i].getTitle());
-            ((TextView) filmLayout.getChildAt(2)).setText(films[i].getRating());
+            ((TextView) filmLayout.getChildAt(1)).setText(films.get(i).getTitle());
+            ((TextView) filmLayout.getChildAt(2)).setText(films.get(i).getRating());
 
             //добавляем в строку
-            final Film film = films[i];
+            final Film film = films.get(i);
             filmLayout.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    getFragmentManager().beginTransaction().replace(R.id.main_fragment_container, FilmFragment.newInstance(film)).addToBackStack(null).commit();
+                    FragmentHelper.openFragment(getFragmentManager(), getActivity(), FilmFragment.newInstance(film));
                 }
             });
             rowSubject.addView(filmLayout);

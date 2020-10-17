@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        ((NestedScrollView) findViewById(R.id.nestedScrollView)).scrollTo(0,0);
         super.onBackPressed();
     }
 }
