@@ -42,7 +42,7 @@ public class Film implements Serializable {
     }
 
     public Drawable getPoster(Context context) {
-        Drawable drawable = ResourcesManager.getInstance(context).getPosterByTitleId(film_id);
+        Drawable drawable = ResourcesManager.getInstance(context).getDrawableById(film_id, true);
         if (drawable == null) drawable = context.getDrawable(R.drawable.noimage_poster);
         return drawable;
     }

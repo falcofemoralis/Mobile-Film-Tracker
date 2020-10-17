@@ -56,7 +56,7 @@ public class Actor implements Serializable {
     }
 
     public Drawable getPhoto(Context context) {
-        Drawable drawable = ResourcesManager.getInstance(context).getPhotoByPersonId(person_id);
+        Drawable drawable = ResourcesManager.getInstance(context).getDrawableById(person_id, false);
         if (drawable == null) drawable = context.getDrawable(R.drawable.noimage_photo);
         return drawable;
     }

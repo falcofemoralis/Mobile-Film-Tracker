@@ -138,10 +138,12 @@ public class FilmFragment extends Fragment {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
         ((ImageView) layout.getChildAt(0)).setImageDrawable(actor.getPhoto(getContext()));
         ((TextView) layout.getChildAt(1)).setText(actor.getName());
+
         TextView charactersTV = (TextView) layout.getChildAt(2);
         charactersTV.setText("");
         for (String character : actor.getCharacters())
             charactersTV.append(character + "\n");
+
         layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

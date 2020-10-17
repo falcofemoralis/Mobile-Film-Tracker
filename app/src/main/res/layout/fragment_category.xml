@@ -8,9 +8,20 @@
     tools:context=".Fragments.CategoryFragment">
 
     <LinearLayout
-        android:id="@+id/fragment_category_films_ll_films"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_margin="15dp"
-        android:orientation="vertical" />
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/fragment_category_films_ll_films"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+
+        <ProgressBar
+            android:id="@+id/fragment_category_pb_loading"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
 </LinearLayout>

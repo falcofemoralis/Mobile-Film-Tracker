@@ -3,8 +3,13 @@ package com.vladyslav.offlinefilmtracker.Managers;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.drawable.Drawable;
+import android.os.Handler;
+import android.os.Looper;
+import android.view.View;
 
 import com.google.android.vending.expansion.zipfile.ZipResourceFile;
+import com.vladyslav.offlinefilmtracker.Objects.Film;
+import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -39,27 +44,18 @@ public class ResourcesManager {
         }
     }
 
-    //получение постера по id фильма
-    public Drawable getPosterByTitleId(String fileName) {
-        InputStream fileStream;
-        try {
-            fileStream = postersZip.getInputStream(fileName + ".jpeg");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
-        return Drawable.createFromStream(fileStream, null);
-    }
+    //получение постера по id фильма или фотографии по id актера
+    public Drawable getDrawableById(final String fileName, final boolean type) {
+        InputStream fileStream = null;
 
-    //получение фотографии по id актера
-    public Drawable getPhotoByPersonId(String fileName) {
-        InputStream fileStream;
         try {
-            fileStream = photosZip.getInputStream(fileName + ".jpeg");
+            if (type) fileStream = postersZip.getInputStream(fileName + ".jpeg");
+            else fileStream = photosZip.getInputStream(fileName + ".jpeg");
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
+            fileStream = null;
         }
+
         return Drawable.createFromStream(fileStream, null);
     }
 }

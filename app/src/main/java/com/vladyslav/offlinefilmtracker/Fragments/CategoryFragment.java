@@ -7,6 +7,8 @@ import android.os.Bundle;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -70,15 +72,15 @@ public class CategoryFragment extends Fragment {
     public void setFilmsTables() {
         //получаем необходимые лаяуты
         final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
-        LinearLayout baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
-
-        //получаем фильмы и устанавливаем первые 9
+        final LinearLayout baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
         ((TextView) filmsLayout.getChildAt(0)).setText(genre + " films");
-        filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(genre);
-        setFilms(filmsLayout);
 
         //добавляем в базовый лаяут
         baseLayout.addView(filmsLayout);
+
+        //получаем фильмы
+        filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(genre);
+        setFilms(filmsLayout);
 
         //при прокрутке в низ, будет установленно 9 фильмов
         scrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
@@ -93,72 +95,104 @@ public class CategoryFragment extends Fragment {
             }
         });
 
-
     }
 
     //устанавливаем фильмы в количестве 9 штук
     public void setFilms(LinearLayout filmsLayout) {
-        TableLayout tableLayout = (TableLayout) filmsLayout.getChildAt(1);
+        final Handler mHandler = new Handler(Looper.getMainLooper());
+        final TableLayout tableLayout = (TableLayout) filmsLayout.getChildAt(1);
+        final ArrayList<Film> films = new ArrayList<>();
+        view.findViewById(R.id.fragment_category_pb_loading).setVisibility(View.VISIBLE);
 
-        ArrayList<Film> films = new ArrayList<>();
-
-        for (int i = 0; i < 9; i++) {
-            if (filmsCursor.moveToNext())
-                films.add(DatabaseManager.getInstance(getContext()).getFilmData(filmsCursor));
-            else
-                break;
-        }
-
-        //необходимые переменные
-        TableRow rowSubject = null;
-        int size = films.size();
-
-        for (int i = 0; i < size; ++i) {
-            // В одном ряду может быть лишь 3 кнопки, если уже три созданы, создается следующая колонка
-            if (i % 3 == 0) {
-                rowSubject = new TableRow(getContext());
-                ViewGroup.LayoutParams params = new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-                rowSubject.setLayoutParams(params);
-                rowSubject.setOrientation(TableRow.HORIZONTAL);
-                rowSubject.setWeightSum(1f);
-                tableLayout.addView(rowSubject);
-            }
-
-            //создаем лаяут самого фильма
-            LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, rowSubject, false);
-
-            //устанавлиавем постер
-            ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-            Drawable poster = films.get(i).getPoster(getContext());
-            filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * 2.5f), (int) (poster.getIntrinsicHeight() * 2.5f)));
-            filmPoster.setImageDrawable(poster);
-
-            //устанавливаем базовую информацию
-            ((TextView) filmLayout.getChildAt(1)).setText(films.get(i).getTitle());
-            ((TextView) filmLayout.getChildAt(2)).setText(films.get(i).getRating());
-
-            //добавляем в строку
-            final Film film = films.get(i);
-            filmLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentHelper.openFragment(getFragmentManager(), getActivity(), FilmFragment.newInstance(film));
+        //получаем фильмы и устанавливаем первые 9
+        (new Thread() {
+            public void run() {
+                for (int i = 0; i < 9; i++) {
+                    if (filmsCursor.moveToNext())
+                        films.add(DatabaseManager.getInstance(getContext()).getFilmData(filmsCursor));
+                    else
+                        break;
                 }
-            });
-            rowSubject.addView(filmLayout);
-        }
 
-        //заполняются остаточные блоки
-        int n = 0;
-        if (size % 3 != 0) n = ((size / 3) * 3 + 3) - size;
+                TableRow rowFilms = null;
+                int size = films.size();
 
-        for (int i = 0; i < n; ++i) {
-            LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, rowSubject, false);
-            ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(150, 250);
-            filmLayout.getChildAt(0).setLayoutParams(params);
-            filmLayout.setGravity(Gravity.CENTER);
-            filmLayout.setVisibility(View.INVISIBLE);
-            rowSubject.addView(filmLayout);
-        }
+                for (int i = 0; i < size; ++i) {
+                    // В одном ряду может быть лишь 3 кнопки, если уже три созданы, создается следующая колонка
+                    if (i % 3 == 0) {
+                        rowFilms = new TableRow(getContext());
+                        ViewGroup.LayoutParams params = new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
+                        rowFilms.setLayoutParams(params);
+                        rowFilms.setOrientation(TableRow.HORIZONTAL);
+                        rowFilms.setWeightSum(1f);
+
+                        //устанавливаем полученные фильмы в строки в UI потоке
+                        final TableRow finalRowSubject = rowFilms;
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                tableLayout.addView(finalRowSubject);
+                            }
+                        });
+                    }
+
+                    //создаем лаяут самого фильма
+                    final LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, rowFilms, false);
+
+                    //устанавлиавем постер
+                    ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
+                    Drawable poster = films.get(i).getPoster(getContext());
+                    filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * 2.5f), (int) (poster.getIntrinsicHeight() * 2.5f)));
+                    filmPoster.setImageDrawable(poster);
+
+                    //устанавливаем базовую информацию
+                    ((TextView) filmLayout.getChildAt(1)).setText(films.get(i).getTitle());
+                    ((TextView) filmLayout.getChildAt(2)).setText(films.get(i).getRating());
+
+                    //добавляем в строку
+                    final Film film = films.get(i);
+                    filmLayout.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            FragmentHelper.openFragment(getFragmentManager(), getActivity(), FilmFragment.newInstance(film));
+                        }
+                    });
+                    final TableRow finalRowFilms = rowFilms;
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            finalRowFilms.addView(filmLayout);
+                        }
+                    });
+
+                }
+
+                //заполняются остаточные блоки
+                int n = 0;
+                if (size % 3 != 0) n = ((size / 3) * 3 + 3) - size;
+
+                for (int i = 0; i < n; ++i) {
+                    final LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, rowFilms, false);
+                    ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(150, 250);
+                    filmLayout.getChildAt(0).setLayoutParams(params);
+                    filmLayout.setGravity(Gravity.CENTER);
+                    filmLayout.setVisibility(View.INVISIBLE);
+                    final TableRow finalRowFilms1 = rowFilms;
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            finalRowFilms1.addView(filmLayout);
+                        }
+                    });
+                }
+
+                mHandler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        view.findViewById(R.id.fragment_category_pb_loading).setVisibility(View.GONE);
+                    }
+                });
+            }
+        }).start();
     }
 }
