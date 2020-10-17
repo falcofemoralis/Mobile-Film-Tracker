@@ -3,19 +3,17 @@ package com.vladyslav.offlinefilmtracker.Managers;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
-
-import java.io.File;
 
 //SINGLETON
 public class DatabaseManager extends SQLiteOpenHelper {
     private final static int DATABASE_VERSION = 1;
     private final static String DATABASE_NAME = "imdb.db";
-    public SQLiteDatabase database;
     private static DatabaseManager instance;
+    public SQLiteDatabase database;
 
     public DatabaseManager(Context context) {
         super(context, context.getObbDir().getPath() + "/" + DATABASE_NAME, null, DATABASE_VERSION);

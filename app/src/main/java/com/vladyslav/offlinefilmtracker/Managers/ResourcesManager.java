@@ -1,37 +1,17 @@
 package com.vladyslav.offlinefilmtracker.Managers;
 
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
-import android.view.View;
 
 import com.google.android.vending.expansion.zipfile.ZipResourceFile;
-import com.vladyslav.offlinefilmtracker.Objects.Film;
-import com.vladyslav.offlinefilmtracker.R;
 
-import java.io.File;
-import java.io.FileDescriptor;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
-import java.util.zip.ZipOutputStream;
 
 //SINGLETON
 public class ResourcesManager {
-    public ZipResourceFile photosZip, postersZip;
     private static ResourcesManager instance;
-
-    public static ResourcesManager getInstance(Context context) {
-        if (instance == null) {
-            instance = new ResourcesManager(context);
-        }
-        return instance;
-    }
+    public ZipResourceFile photosZip, postersZip;
 
     public ResourcesManager(Context context) {
         //  String obbFilePath = context.getObbDir().getPath() + "/main.1.com.vladyslav.offlinefilmtracker.obb";
@@ -42,6 +22,13 @@ public class ResourcesManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static ResourcesManager getInstance(Context context) {
+        if (instance == null) {
+            instance = new ResourcesManager(context);
+        }
+        return instance;
     }
 
     //получение постера по id фильма или фотографии по id актера

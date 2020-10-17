@@ -1,12 +1,9 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
-import android.annotation.SuppressLint;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,21 +11,13 @@ import android.widget.HorizontalScrollView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
-import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
-import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
+import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
-
-import java.util.Iterator;
-import java.util.Objects;
-import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.vladyslav.offlinefilmtracker.R;
 
 public class MainFragment extends Fragment {
     final private double POSTER_SCALE_FACTOR = 2.5; //размер постеров у фильмов

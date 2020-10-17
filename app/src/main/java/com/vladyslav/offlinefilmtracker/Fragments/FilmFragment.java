@@ -1,9 +1,6 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.os.Bundle;
-
-import androidx.fragment.app.Fragment;
-
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.TextPaint;
@@ -16,11 +13,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.fragment.app.Fragment;
+
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
-import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
+import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
 

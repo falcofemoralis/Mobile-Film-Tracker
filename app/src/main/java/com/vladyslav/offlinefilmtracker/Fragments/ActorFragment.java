@@ -2,10 +2,6 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-
-import androidx.core.widget.NestedScrollView;
-import androidx.fragment.app.Fragment;
-
 import android.os.Handler;
 import android.os.Looper;
 import android.view.Gravity;
@@ -17,6 +13,8 @@ import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
+
+import androidx.fragment.app.Fragment;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
