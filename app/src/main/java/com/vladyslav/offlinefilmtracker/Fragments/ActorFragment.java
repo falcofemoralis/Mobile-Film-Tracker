@@ -48,10 +48,12 @@ public class ActorFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_actor, container, false);
-        filmsLayout = view.findViewById(R.id.fragment_actor_films_ll_films);
-        setActorBaseInfo();
-        setFilmsTables();
+        if (view == null) {
+            view = inflater.inflate(R.layout.fragment_actor, container, false);
+            filmsLayout = view.findViewById(R.id.fragment_actor_films_ll_films);
+            setActorBaseInfo();
+            setFilmsTables();
+        }
         return view;
     }
 

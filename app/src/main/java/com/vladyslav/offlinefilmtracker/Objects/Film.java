@@ -1,6 +1,7 @@
 package com.vladyslav.offlinefilmtracker.Objects;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
@@ -41,9 +42,9 @@ public class Film implements Serializable {
         return votes;
     }
 
-    public Drawable getPoster(Context context) {
-        Drawable drawable = ResourcesManager.getInstance(context).getDrawableById(film_id, true);
-        if (drawable == null) drawable = context.getDrawable(R.drawable.noimage_poster);
+    public BitmapDrawable getPoster(Context context) {
+        BitmapDrawable drawable = ResourcesManager.getInstance(context).getDrawableById(film_id, true);
+        if (drawable == null) drawable = (BitmapDrawable) context.getDrawable(R.drawable.noimage_poster);
         return drawable;
     }
 

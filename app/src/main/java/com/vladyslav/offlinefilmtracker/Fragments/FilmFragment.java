@@ -47,13 +47,16 @@ public class FilmFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_film, container, false);
-        databaseManager = DatabaseManager.getInstance(view.getContext());
-        setBaseFilmInfo();
-        setAdditionalFilmInfo();
-        setCrew();
+        if (view == null) {
+            view = inflater.inflate(R.layout.fragment_film, container, false);
+            databaseManager = DatabaseManager.getInstance(view.getContext());
+            setBaseFilmInfo();
+            setAdditionalFilmInfo();
+            setCrew();
+        }
         return view;
     }
+
 
     //устанавливаем основную информацию про фильм
     public void setBaseFilmInfo() {

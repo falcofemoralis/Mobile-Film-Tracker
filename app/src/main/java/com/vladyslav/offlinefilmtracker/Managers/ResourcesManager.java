@@ -1,6 +1,7 @@
 package com.vladyslav.offlinefilmtracker.Managers;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.google.android.vending.expansion.zipfile.ZipResourceFile;
@@ -32,7 +33,7 @@ public class ResourcesManager {
     }
 
     //получение постера по id фильма или фотографии по id актера
-    public Drawable getDrawableById(final String fileName, final boolean type) {
+    public BitmapDrawable getDrawableById(final String fileName, final boolean type) {
         InputStream fileStream = null;
 
         try {
@@ -40,9 +41,8 @@ public class ResourcesManager {
             else fileStream = photosZip.getInputStream(fileName + ".jpeg");
         } catch (IOException e) {
             e.printStackTrace();
-            fileStream = null;
         }
 
-        return Drawable.createFromStream(fileStream, null);
+        return (BitmapDrawable) BitmapDrawable.createFromStream(fileStream, null);
     }
 }

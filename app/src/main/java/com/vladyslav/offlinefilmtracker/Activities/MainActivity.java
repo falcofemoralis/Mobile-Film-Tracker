@@ -5,6 +5,7 @@ import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
@@ -30,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                //   setScrollViewToLastPosition();
                 fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 switch (item.getItemId()) {
                     case R.id.nav_movies:
@@ -48,6 +50,33 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        //возвращает скролл вью в прошлую позицию
+        int count = fm.getBackStackEntryCount();
+        if (count > 0) {
+            FragmentManager.BackStackEntry backStackEntry = fm.getBackStackEntryAt(count - 1);
+            final int scrollViewLastPos = Integer.parseInt(backStackEntry.getName());
+
+            final NestedScrollView mainScroll = findViewById(R.id.nestedScrollView);
+            mainScroll.postDelayed(new Runnable() {
+                public void run() {
+                    mainScroll.scrollTo(0, scrollViewLastPos);
+                }
+            }, 20);
+        }
         super.onBackPressed();
     }
+
+    //перевод dp  в пиксели
+    public int getPxFromDp(int dp) {
+        final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
+        return (int) (dp * scale + 0.5f);
+    }
+
+    //перевод пикселей  в dp
+    private int getDpFromPx(int px) {
+        final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
+        return (int) ((px - 0.5f) / scale);
+    }
+
+
 }

@@ -1,7 +1,7 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.database.Cursor;
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -18,6 +18,7 @@ import android.widget.TextView;
 import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 
 public class CategoryFragment extends Fragment {
     private static final String ARG_GENRE = "param1";
+    private static final int FILMS_PER_SCROLL = 9;
     private String genre;
     private View view;
     private NestedScrollView scrollView;
@@ -50,9 +52,11 @@ public class CategoryFragment extends Fragment {
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.fragment_category, container, false);
-        scrollView = getActivity().findViewById(R.id.nestedScrollView);
-        setFilmsTables();
+        if (view == null) {
+            view = inflater.inflate(R.layout.fragment_category, container, false);
+            scrollView = getActivity().findViewById(R.id.nestedScrollView);
+            setFilmsTables();
+        }
         return view;
     }
 
@@ -101,7 +105,7 @@ public class CategoryFragment extends Fragment {
         //получаем фильмы и устанавливаем первые 9
         (new Thread() {
             public void run() {
-                for (int i = 0; i < 9; i++) {
+                for (int i = 0; i < FILMS_PER_SCROLL; i++) {
                     if (filmsCursor.moveToNext())
                         films.add(DatabaseManager.getInstance(getContext()).getFilmData(filmsCursor));
                     else
@@ -134,10 +138,9 @@ public class CategoryFragment extends Fragment {
                     final LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, rowFilms, false);
 
                     //устанавлиавем постер
-                    ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-                    Drawable poster = films.get(i).getPoster(getContext());
-                    filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * 2.5f), (int) (poster.getIntrinsicHeight() * 2.5f)));
-                    filmPoster.setImageDrawable(poster);
+                    final ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
+                    final BitmapDrawable poster = films.get(i).getPoster(getContext());
+                    filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getBitmap().getWidth() * 0.9f), (int) (poster.getBitmap().getHeight() * 0.9f)));
 
                     //устанавливаем базовую информацию
                     ((TextView) filmLayout.getChildAt(1)).setText(films.get(i).getTitle());
@@ -155,6 +158,7 @@ public class CategoryFragment extends Fragment {
                     mHandler.post(new Runnable() {
                         @Override
                         public void run() {
+                            Glide.with(view).load(poster).into(filmPoster);
                             finalRowFilms.addView(filmLayout);
                         }
                     });

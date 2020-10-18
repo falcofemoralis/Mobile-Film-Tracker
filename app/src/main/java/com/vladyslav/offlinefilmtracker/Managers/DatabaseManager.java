@@ -4,9 +4,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.widget.Toast;
 
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
+
+import java.io.File;
 
 //SINGLETON
 public class DatabaseManager extends SQLiteOpenHelper {
@@ -15,14 +18,20 @@ public class DatabaseManager extends SQLiteOpenHelper {
     private static DatabaseManager instance;
     public SQLiteDatabase database;
 
-    public DatabaseManager(Context context) {
-        super(context, context.getObbDir().getPath() + "/" + DATABASE_NAME, null, DATABASE_VERSION);
+    public DatabaseManager(Context context, String path) {
+        super(context, path, null, DATABASE_VERSION);
         database = getReadableDatabase();
     }
 
     public static DatabaseManager getInstance(Context context) {
         if (instance == null) {
-            instance = new DatabaseManager(context);
+            String path = context.getObbDir().getPath() + "/" + DATABASE_NAME;
+            File file = new File(path);
+            if (!(file.exists() && !file.isDirectory())) {
+                Toast.makeText(context, "Open error", Toast.LENGTH_SHORT).show();
+                return null;
+            }
+            instance = new DatabaseManager(context, path);
         }
         return instance;
     }

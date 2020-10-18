@@ -1,6 +1,6 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
-import android.graphics.drawable.Drawable;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -20,24 +20,25 @@ import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class MainFragment extends Fragment {
-    final private double POSTER_SCALE_FACTOR = 2.5; //размер постеров у фильмов
+    final private double POSTER_SCALE_FACTOR = 1.2; //размер постеров у фильмов
     final private int FILMS_IN_ROW = 7; //кол-во фильмов в строке
     private LinearLayout baseLayout; //базовый лаяут
     private View view;
     private DatabaseManager databaseManager;
+    private int moreBtnHeight;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_main, container, false);
             baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
-            databaseManager = DatabaseManager.getInstance(view.getContext());
 
             final Handler mHandler = new Handler(Looper.getMainLooper());
             final String[] genres = new String[]{"Popular", "Action", "Sci-Fi", "Fantasy", "Comedy", "Animation"};
             //создаем поток
             (new Thread() {
                 public void run() {
+                    databaseManager = DatabaseManager.getInstance(view.getContext());
                     //получаем фильмы по жанру
                     for (int i = 0; i < genres.length; ++i) {
                         final Film[] films;
@@ -72,22 +73,22 @@ public class MainFragment extends Fragment {
         LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         for (int i = 0; i < FILMS_IN_ROW; i++)
             addFilm(films[i], linearLayout);
+
         if (genre != "Popular") addMoreBtn(linearLayout, genre);
         baseLayout.addView(filmsLayout); //добавляем в корень
     }
 
     //добавление нового фильма в указанный лаяут
     public void addFilm(final Film film, LinearLayout layout) {
-        //получаем постер
-        final Drawable poster = film.getPoster(getContext());
-
         //создаем View для постера
         final LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, null);
 
         //ставим постер
+        BitmapDrawable poster = film.getPoster(getContext());
         ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-        filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * POSTER_SCALE_FACTOR), (int) (poster.getIntrinsicHeight() * POSTER_SCALE_FACTOR)));
+        filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getBitmap().getWidth() / POSTER_SCALE_FACTOR), (int) (poster.getBitmap().getHeight() / POSTER_SCALE_FACTOR)));
         filmPoster.setImageDrawable(poster);
+        moreBtnHeight = (int) (poster.getBitmap().getHeight() / POSTER_SCALE_FACTOR);
 
         //ставим основную информацию
         ((TextView) filmLayout.getChildAt(1)).setText(film.getTitle());
@@ -97,7 +98,7 @@ public class MainFragment extends Fragment {
         filmLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(getFragmentManager(), getActivity(), FilmFragment.newInstance(film));
+                FragmentHelper.openFragment(getParentFragmentManager(), getActivity(), FilmFragment.newInstance(film));
             }
         });
 
@@ -105,14 +106,24 @@ public class MainFragment extends Fragment {
     }
 
     //добавляем кнопку открытия всех фильмов по категории
-    public void addMoreBtn(LinearLayout linearLayout, final String genre) {
-        LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
-        layout.getChildAt(0).setOnClickListener(new View.OnClickListener() {
+    public void addMoreBtn(LinearLayout baseLayout, final String genre) {
+        LinearLayout moreBtnLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
+        ImageView moreBtn = (ImageView) moreBtnLayout.getChildAt(0);
+        moreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentHelper.openFragment(getFragmentManager(), getActivity(), CategoryFragment.newInstance(genre));
             }
         });
-        linearLayout.addView(layout);
+        ViewGroup.LayoutParams layoutParams = moreBtn.getLayoutParams();
+        layoutParams.height = moreBtnHeight;
+        moreBtn.setLayoutParams(layoutParams);
+        baseLayout.addView(moreBtnLayout);
+    }
+
+    //перевод пикселей  в dp
+    private int getDpFromPx(int px) {
+        final float scale = getContext().getResources().getDisplayMetrics().density;
+        return (int) ((px - 0.5f) / scale);
     }
 }
