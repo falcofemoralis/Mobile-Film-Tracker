@@ -81,6 +81,8 @@ public class FilmFragment extends Fragment {
     public void setAdditionalFilmInfo() {
         ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText("Release date" + ": " + film.getPremiered());
         ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText("Runtime" + ": " + film.getRuntime_minutes() + " minutes");
+        ((TextView) view.findViewById(R.id.fragment_film_tv_plot)).setText(film.getPlot());
+
 
         TextView adult = view.findViewById(R.id.fragment_film_tv_adult);
         if (film.getIsAdult())
