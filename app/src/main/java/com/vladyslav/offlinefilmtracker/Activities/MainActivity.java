@@ -12,6 +12,7 @@ import androidx.fragment.app.FragmentManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vladyslav.offlinefilmtracker.Fragments.MainFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.SearchFragment;
+import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class MainActivity extends AppCompatActivity {
@@ -23,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         fm = getSupportFragmentManager(); // получаем менджер фрагментов
+        FragmentHelper.init(fm, this);
+
         final Fragment mainFragment = new MainFragment(); //главный фрагмент
         final Fragment searchFragment = new SearchFragment(); //фрагмент поиска
 

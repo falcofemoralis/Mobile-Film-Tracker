@@ -1,5 +1,6 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
@@ -17,6 +18,7 @@ import androidx.fragment.app.Fragment;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
@@ -138,7 +140,14 @@ public class FilmFragment extends Fragment {
     //установка актера в колонку Crew
     public void setActor(final Actor actor, LinearLayout actorsLayout) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
-        ((ImageView) layout.getChildAt(0)).setImageDrawable(actor.getPhoto(getContext()));
+
+        //ставим постер
+        BitmapDrawable photo = actor.getPhoto(getContext());
+        ImageView photoView = (ImageView) layout.getChildAt(0);
+        photoView.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(photo.getBitmap().getWidth(), getContext()) * 8),
+                (int) (ResourcesManager.getDpFromPx(photo.getBitmap().getHeight(), getContext()) * 8)));
+        photoView.setImageDrawable(photo);
+
         ((TextView) layout.getChildAt(1)).setText(actor.getName());
 
         TextView charactersTV = (TextView) layout.getChildAt(2);
@@ -149,7 +158,7 @@ public class FilmFragment extends Fragment {
         layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(getFragmentManager(), getActivity(), ActorFragment.newInstance(actor));
+                FragmentHelper.openFragment(ActorFragment.newInstance(actor));
             }
         });
         actorsLayout.addView(layout);
@@ -161,7 +170,7 @@ public class FilmFragment extends Fragment {
         ClickableSpan clickableSpan = new ClickableSpan() {
             @Override
             public void onClick(View textView) {
-                FragmentHelper.openFragment(getFragmentManager(), getActivity(), ActorFragment.newInstance(actor));
+                FragmentHelper.openFragment(ActorFragment.newInstance(actor));
             }
 
             @Override

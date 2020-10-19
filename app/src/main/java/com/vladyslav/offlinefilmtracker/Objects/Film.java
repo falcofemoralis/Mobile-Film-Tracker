@@ -43,9 +43,7 @@ public class Film implements Serializable {
     }
 
     public BitmapDrawable getPoster(Context context) {
-        BitmapDrawable drawable = ResourcesManager.getInstance(context).getDrawableById(film_id, true);
-        if (drawable == null) drawable = (BitmapDrawable) context.getDrawable(R.drawable.noimage_poster);
-        return drawable;
+        return ResourcesManager.getInstance(context).getDrawableById(film_id, true);
     }
 
     public String getRuntime_minutes() {

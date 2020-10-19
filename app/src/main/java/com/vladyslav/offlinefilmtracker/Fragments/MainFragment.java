@@ -100,7 +100,7 @@ public class MainFragment extends Fragment {
         filmLayout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(getParentFragmentManager(), getActivity(), FilmFragment.newInstance(film));
+                FragmentHelper.openFragment(FilmFragment.newInstance(film));
             }
         });
 
@@ -114,7 +114,7 @@ public class MainFragment extends Fragment {
         moreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(getFragmentManager(), getActivity(), CategoryFragment.newInstance(genre));
+                FragmentHelper.openFragment(CategoryFragment.newInstance(genre));
             }
         });
         ViewGroup.LayoutParams layoutParams = moreBtn.getLayoutParams();

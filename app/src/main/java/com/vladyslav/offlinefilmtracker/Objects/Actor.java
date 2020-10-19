@@ -1,6 +1,7 @@
 package com.vladyslav.offlinefilmtracker.Objects;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
@@ -55,10 +56,8 @@ public class Actor implements Serializable {
         return category;
     }
 
-    public Drawable getPhoto(Context context) {
-        Drawable drawable = ResourcesManager.getInstance(context).getDrawableById(person_id, false);
-        if (drawable == null) drawable = context.getDrawable(R.drawable.noimage_photo);
-        return drawable;
+    public BitmapDrawable getPhoto(Context context) {
+        return ResourcesManager.getInstance(context).getDrawableById(person_id, false);
     }
 
     @Override

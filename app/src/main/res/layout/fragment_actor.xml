@@ -2,6 +2,7 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_actor_films_ll_main"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
@@ -27,8 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="150dp"
             android:layout_margin="5dp"
-            android:layout_weight="1"
-            android:src="@drawable/noimage_photo" />
+            android:layout_weight="1" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -56,16 +56,9 @@
         </LinearLayout>
     </LinearLayout>
 
-    <LinearLayout
-        android:id="@+id/fragment_actor_films_ll_films"
+    <ProgressBar
+        android:id="@+id/fragment_actor_pb_loading"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="15dp"
-        android:orientation="vertical">
+        android:layout_height="wrap_content" />
 
-        <ProgressBar
-            android:id="@+id/fragment_actor_pb_loading"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-    </LinearLayout>
 </LinearLayout>

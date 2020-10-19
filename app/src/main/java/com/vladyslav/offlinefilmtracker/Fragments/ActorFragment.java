@@ -1,6 +1,5 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,25 +9,29 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TableLayout;
-import android.widget.TableRow;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
-import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
+import com.vladyslav.offlinefilmtracker.Objects.FilmAdapter;
 import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class ActorFragment extends Fragment {
     private static final String ARG_ACTOR = "param1";
     private Actor actor;
     private View view;
-    private LinearLayout filmsLayout;
+    private LinearLayout mainLayout;
+    private ProgressBar progressBar;
 
     public static ActorFragment newInstance(Actor actor) {
         ActorFragment fragment = new ActorFragment();
@@ -50,9 +53,10 @@ public class ActorFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_actor, container, false);
-            filmsLayout = view.findViewById(R.id.fragment_actor_films_ll_films);
+            mainLayout = view.findViewById(R.id.fragment_actor_films_ll_main);
+            progressBar = view.findViewById(R.id.fragment_actor_pb_loading);
             setActorBaseInfo();
-            setFilmsTables();
+            setFilms();
         }
         return view;
     }
@@ -66,16 +70,23 @@ public class ActorFragment extends Fragment {
     }
 
     //сортируем фильмы по роли
-    public void setFilmsTables() {
+    public void setFilms() {
         final Handler mHandler = new Handler(Looper.getMainLooper());
 
+        final Map<String, Integer> rolesMap = new HashMap<String, Integer>() {{
+            put("actor", 0);
+            put("director", 1);
+            put("producer", 2);
+            put("writer", 3);
+        }};
+
         final ArrayList<ArrayList<Film>> filmByRoles = new ArrayList<>();
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < rolesMap.size(); ++i) {
             ArrayList<Film> list = new ArrayList<>();
             filmByRoles.add(list);
         }
-        view.findViewById(R.id.fragment_actor_pb_loading).setVisibility(View.VISIBLE);
 
+        progressBar.setVisibility(View.VISIBLE);
         //создаем поток
         (new Thread() {
             public void run() {
@@ -85,100 +96,56 @@ public class ActorFragment extends Fragment {
                 //распределяем фильмы в зависимости от роли
                 for (Film film : films) {
                     String[] roles = DatabaseManager.getInstance(getContext()).getRoleByPersonAndTitleId(actor.getPerson_id(), film.getFilm_id());
-                    int n;
                     for (String role : roles) {
-                        switch (role) {
-                            case "director":
-                                n = 1;
-                                break;
-                            case "producer":
-                                n = 2;
-                                break;
-                            case "writer":
-                                n = 3;
-                                break;
-                            default:
-                                n = 0;
+                        int roleId = 0;
+                        try {
+                            roleId = rolesMap.get(role);
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        filmByRoles.get(n).add(film);
+                        filmByRoles.get(roleId).add(film);
                     }
                 }
+
                 //устанавливаем полученные фильмы в строки в UI потоке
                 mHandler.post(new Runnable() {
                     @Override
                     public void run() {
+                        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                        layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
+
                         //получение всех фильмов акетера
-                        String[] roles = new String[]{"Actor", "Director", "Producer", "Writer"};
                         for (int i = 0; i < filmByRoles.size(); ++i) {
                             if (filmByRoles.get(i).size() != 0) {
-                                LinearLayout linearLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
-                                ((TextView) linearLayout.getChildAt(0)).setText(roles[i]);
-                                setFilms(filmByRoles.get(i), (TableLayout) linearLayout.getChildAt(1));
-                                filmsLayout.addView(linearLayout);
+                                TextView textView = new TextView(getContext());
+                                textView.setTextAppearance(R.style.Header);
+
+                                String role = getKey(rolesMap, i);
+                                textView.setText(role.substring(0, 1).toUpperCase() + role.substring(1));
+                                mainLayout.addView(textView);
+
+                                RecyclerView recyclerView = new RecyclerView(getContext());
+                                recyclerView.setLayoutParams(layoutParams);
+                                recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+                                FilmAdapter adapter = new FilmAdapter(getContext(), filmByRoles.get(i));
+                                recyclerView.setAdapter(adapter);
+                                mainLayout.addView(recyclerView);
                             }
                         }
                         view.findViewById(R.id.fragment_actor_pb_loading).setVisibility(View.GONE);
-                        filmsLayout.setVisibility(View.VISIBLE);
 
                     }
                 });
-
             }
         }).start();
     }
 
-    //устанавливаем фильмы актеру
-    public void setFilms(ArrayList<Film> films, TableLayout tableLayout) {
-        //необходимые переменные
-        TableRow rowFilms = null;
-        int size = films.size();
-
-        for (int i = 0; i < size; ++i) {
-            // В одном ряду может быть лишь 3 кнопки, если уже три созданы, создается следующая колонка
-            if (i % 3 == 0) {
-                rowFilms = new TableRow(getContext());
-                ViewGroup.LayoutParams params = new TableLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT, 1f);
-                rowFilms.setLayoutParams(params);
-                rowFilms.setOrientation(TableRow.HORIZONTAL);
-                rowFilms.setWeightSum(1f);
-                tableLayout.addView(rowFilms);
+    public <K, V> K getKey(Map<K, V> map, V value) {
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            if (entry.getValue().equals(value)) {
+                return entry.getKey();
             }
-
-            //создаем лаяут самого фильма
-            LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, rowFilms, false);
-
-            //устанавлиавем постер
-            ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-            Drawable poster = films.get(i).getPoster(getContext());
-            filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getIntrinsicWidth() * 2.5f), (int) (poster.getIntrinsicHeight() * 2.5f)));
-            filmPoster.setImageDrawable(poster);
-
-            //устанавливаем базовую информацию
-            ((TextView) filmLayout.getChildAt(1)).setText(films.get(i).getTitle());
-            ((TextView) filmLayout.getChildAt(2)).setText(films.get(i).getRating());
-
-            //добавляем в строку
-            final Film film = films.get(i);
-            filmLayout.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentHelper.openFragment(getFragmentManager(), getActivity(), FilmFragment.newInstance(film));
-                }
-            });
-            rowFilms.addView(filmLayout);
         }
-
-        //заполняются остаточные блоки
-        int n = 0;
-        if (size % 3 != 0) n = ((size / 3) * 3 + 3) - size;
-
-        for (int i = 0; i < n; ++i) {
-            LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, rowFilms, false);
-            ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(150, 250);
-            filmLayout.getChildAt(0).setLayoutParams(params);
-            filmLayout.setGravity(Gravity.CENTER);
-            filmLayout.setVisibility(View.INVISIBLE);
-            rowFilms.addView(filmLayout);
-        }
+        return null;
     }
 }

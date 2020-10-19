@@ -8,7 +8,16 @@ import androidx.fragment.app.FragmentManager;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class FragmentHelper {
-    public static void openFragment(FragmentManager fragmentManager, Activity activity, Fragment fragment) {
+
+    private static FragmentManager fragmentManager;
+    private static Activity activity;
+
+    public static void init(FragmentManager fm, Activity act) {
+        fragmentManager = fm;
+        activity = act;
+    }
+
+    public static void openFragment(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
                 .replace(R.id.main_fragment_container, fragment)

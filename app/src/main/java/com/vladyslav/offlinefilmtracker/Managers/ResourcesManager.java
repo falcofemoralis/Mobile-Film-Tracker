@@ -38,6 +38,11 @@ public class ResourcesManager {
         try {
             if (type) fileStream = postersZip.getInputStream(fileName + ".jpeg");
             else fileStream = photosZip.getInputStream(fileName + ".jpeg");
+
+            if (fileStream == null) {
+                if (type) fileStream = postersZip.getInputStream("noimage_poster.jpeg");
+                else fileStream = photosZip.getInputStream("noimage_photo.jpeg");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
