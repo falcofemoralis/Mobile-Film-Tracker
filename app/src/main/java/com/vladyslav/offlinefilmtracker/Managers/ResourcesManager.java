@@ -2,7 +2,6 @@ package com.vladyslav.offlinefilmtracker.Managers;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 
 import com.google.android.vending.expansion.zipfile.ZipResourceFile;
 
@@ -44,5 +43,17 @@ public class ResourcesManager {
         }
 
         return (BitmapDrawable) BitmapDrawable.createFromStream(fileStream, null);
+    }
+
+    //перевод пикселей  в dp
+    public static int getDpFromPx(int px, Context context) {
+        float scale = context.getResources().getDisplayMetrics().density;
+        return (int) ((px - 0.5f) / scale);
+    }
+
+    //перевод dp в пиксели
+    public static int getPxFromDp(int dp, Context context) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dp * scale + 0.5f);
     }
 }

@@ -21,6 +21,7 @@ import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
@@ -29,6 +30,7 @@ import java.util.ArrayList;
 public class CategoryFragment extends Fragment {
     private static final String ARG_GENRE = "param1";
     private static final int FILMS_PER_SCROLL = 9;
+    private final double POSTER_SCALE_FACTOR = 2.4; //размер постеров у фильмов
     private String genre;
     private View view;
     private NestedScrollView scrollView;
@@ -69,8 +71,8 @@ public class CategoryFragment extends Fragment {
     //создаем таблицу фильмов
     public void setFilmsTables() {
         //получаем необходимые лаяуты
-        final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
         final LinearLayout baseLayout = view.findViewById(R.id.fragment_category_films_ll_films);
+        final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_films_table, null);
         ((TextView) filmsLayout.getChildAt(0)).setText(genre + " films");
 
         //добавляем в базовый лаяут
@@ -140,7 +142,8 @@ public class CategoryFragment extends Fragment {
                     //устанавлиавем постер
                     final ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
                     final BitmapDrawable poster = films.get(i).getPoster(getContext());
-                    filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getBitmap().getWidth() * 0.9f), (int) (poster.getBitmap().getHeight() * 0.9f)));
+                    filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), getContext()) * POSTER_SCALE_FACTOR),
+                            (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * POSTER_SCALE_FACTOR)));
 
                     //устанавливаем базовую информацию
                     ((TextView) filmLayout.getChildAt(1)).setText(films.get(i).getTitle());

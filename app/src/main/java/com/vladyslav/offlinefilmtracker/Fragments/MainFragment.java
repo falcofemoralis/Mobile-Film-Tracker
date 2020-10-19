@@ -16,12 +16,13 @@ import androidx.fragment.app.Fragment;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class MainFragment extends Fragment {
-    final private double POSTER_SCALE_FACTOR = 1.2; //размер постеров у фильмов
-    final private int FILMS_IN_ROW = 7; //кол-во фильмов в строке
+    private final double POSTER_SCALE_FACTOR = 2; //размер постеров у фильмов
+    private final int FILMS_IN_ROW = 7; //кол-во фильмов в строке
     private LinearLayout baseLayout; //базовый лаяут
     private View view;
     private DatabaseManager databaseManager;
@@ -86,9 +87,10 @@ public class MainFragment extends Fragment {
         //ставим постер
         BitmapDrawable poster = film.getPoster(getContext());
         ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-        filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (poster.getBitmap().getWidth() / POSTER_SCALE_FACTOR), (int) (poster.getBitmap().getHeight() / POSTER_SCALE_FACTOR)));
+        filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), getContext()) * POSTER_SCALE_FACTOR),
+                (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * POSTER_SCALE_FACTOR)));
         filmPoster.setImageDrawable(poster);
-        moreBtnHeight = (int) (poster.getBitmap().getHeight() / POSTER_SCALE_FACTOR);
+        moreBtnHeight = (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * POSTER_SCALE_FACTOR);
 
         //ставим основную информацию
         ((TextView) filmLayout.getChildAt(1)).setText(film.getTitle());
@@ -119,11 +121,5 @@ public class MainFragment extends Fragment {
         layoutParams.height = moreBtnHeight;
         moreBtn.setLayoutParams(layoutParams);
         baseLayout.addView(moreBtnLayout);
-    }
-
-    //перевод пикселей  в dp
-    private int getDpFromPx(int px) {
-        final float scale = getContext().getResources().getDisplayMetrics().density;
-        return (int) ((px - 0.5f) / scale);
     }
 }

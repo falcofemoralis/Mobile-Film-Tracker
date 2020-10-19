@@ -65,18 +65,4 @@ public class MainActivity extends AppCompatActivity {
         }
         super.onBackPressed();
     }
-
-    //перевод dp  в пиксели
-    public int getPxFromDp(int dp) {
-        final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
-        return (int) (dp * scale + 0.5f);
-    }
-
-    //перевод пикселей  в dp
-    private int getDpFromPx(int px) {
-        final float scale = getApplicationContext().getResources().getDisplayMetrics().density;
-        return (int) ((px - 0.5f) / scale);
-    }
-
-
 }
