@@ -1,32 +1,40 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
-import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.HorizontalScrollView;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
-import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
-import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
+import com.vladyslav.offlinefilmtracker.Objects.FilmAdapter;
 import com.vladyslav.offlinefilmtracker.R;
 
+import java.util.ArrayList;
+
 public class MainFragment extends Fragment {
-    private final double POSTER_SCALE_FACTOR = 2; //размер постеров у фильмов
     private final int FILMS_IN_ROW = 7; //кол-во фильмов в строке
     private LinearLayout baseLayout; //базовый лаяут
     private View view;
     private DatabaseManager databaseManager;
-    private int moreBtnHeight;
+
+    public class MoreBtn {
+        public int height;
+        public String genre;
+
+        public MoreBtn(int height, String genre) {
+            this.height = height;
+            this.genre = genre;
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,7 +50,7 @@ public class MainFragment extends Fragment {
                     databaseManager = DatabaseManager.getInstance(view.getContext());
                     //получаем фильмы по жанру
                     for (int i = 0; i < genres.length; ++i) {
-                        final Film[] films;
+                        final ArrayList<Film> films;
                         if (genres[i].equals("Popular"))
                             films = databaseManager.getPopularFilmsLimited(FILMS_IN_ROW);
                         else
@@ -52,7 +60,7 @@ public class MainFragment extends Fragment {
                         final int finalI = i;
                         mHandler.post(new Runnable() {
                             public void run() {
-                                createFilmRow(films, genres[finalI]);
+                                setFilms(films, genres[finalI]);
                                 if (finalI == genres.length - 1) {
                                     getActivity().findViewById(R.id.progress_bar).setVisibility(View.GONE);
                                     getActivity().findViewById(R.id.main_fragment_container).setVisibility(View.VISIBLE);
@@ -66,60 +74,25 @@ public class MainFragment extends Fragment {
         return view;
     }
 
-    //создаем строку с фильмами
-    public void createFilmRow(Film[] films, String genre) {
-        LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //колонка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(genre + " films"); //устанавливаем заголовок колонки
+    public void setFilms(ArrayList<Film> films, final String genre) {
+        TextView textView = new TextView(getContext());
+        textView.setTextAppearance(R.style.Header);
+        textView.setText(genre);
+        baseLayout.addView(textView);
 
-        LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
-        for (int i = 0; i < FILMS_IN_ROW; i++)
-            addFilm(films[i], linearLayout);
+        RecyclerView recyclerView = new RecyclerView(getContext());
+        recyclerView.setLayoutParams(new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+        recyclerView.setLayoutManager(new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false));
 
-        if (genre != "Popular") addMoreBtn(linearLayout, genre);
-        baseLayout.addView(filmsLayout); //добавляем в корень
-    }
+        FilmAdapter adapter;
+        if (genre != "Popular") {
+            MoreBtn moreBtn = new MoreBtn(((Film) films.get(0)).getPoster(getContext()).getBitmap().getHeight(), genre);
+            adapter = new FilmAdapter(getContext(), films, moreBtn);
+        } else {
+            adapter = new FilmAdapter(getContext(), films);
+        }
 
-    //добавление нового фильма в указанный лаяут
-    public void addFilm(final Film film, LinearLayout layout) {
-        //создаем View для постера
-        final LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, null);
-
-        //ставим постер
-        BitmapDrawable poster = film.getPoster(getContext());
-        ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-        filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), getContext()) * POSTER_SCALE_FACTOR),
-                (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * POSTER_SCALE_FACTOR)));
-        filmPoster.setImageDrawable(poster);
-        moreBtnHeight = (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * POSTER_SCALE_FACTOR);
-
-        //ставим основную информацию
-        ((TextView) filmLayout.getChildAt(1)).setText(film.getTitle());
-        ((TextView) filmLayout.getChildAt(2)).setText(film.getRating());
-
-        //добавляем нажатие для перехода на фрагмент фильма
-        filmLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentHelper.openFragment(FilmFragment.newInstance(film));
-            }
-        });
-
-        layout.addView(filmLayout);
-    }
-
-    //добавляем кнопку открытия всех фильмов по категории
-    public void addMoreBtn(LinearLayout baseLayout, final String genre) {
-        LinearLayout moreBtnLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
-        ImageView moreBtn = (ImageView) moreBtnLayout.getChildAt(0);
-        moreBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                FragmentHelper.openFragment(CategoryFragment.newInstance(genre));
-            }
-        });
-        ViewGroup.LayoutParams layoutParams = moreBtn.getLayoutParams();
-        layoutParams.height = moreBtnHeight;
-        moreBtn.setLayoutParams(layoutParams);
-        baseLayout.addView(moreBtnLayout);
+        recyclerView.setAdapter(adapter);
+        baseLayout.addView(recyclerView);
     }
 }

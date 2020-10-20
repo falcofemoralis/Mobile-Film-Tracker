@@ -4,12 +4,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.widget.Toast;
 
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 
 import java.io.File;
+import java.util.ArrayList;
 
 //SINGLETON
 public class DatabaseManager extends SQLiteOpenHelper {
@@ -27,7 +27,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         if (instance == null) {
             String path = context.getObbDir().getPath() + "/" + DATABASE_NAME;
             File file = new File(path);
-            if (!(file.exists() && !file.isDirectory())) 
+            if (!(file.exists() && !file.isDirectory()))
                 return null;
 
             instance = new DatabaseManager(context, path);
@@ -44,42 +44,37 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получение популярных фильмов
-    public Film[] getPopularFilmsLimited(int limit) {
-        Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, titles.plot, " +
-                "ratings.rating, ratings.votes " +
+    public ArrayList<Film> getPopularFilmsLimited(int limit) {
+        Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
                 "ORDER BY ratings.votes DESC LIMIT ?", new String[]{String.valueOf(limit)});
-        Film[] film = new Film[cursor.getCount()];
-        int n = 0;
+        ArrayList<Film> films = new ArrayList<>();
         while (cursor.moveToNext())
-            film[n++] = getFilmData(cursor);
+            films.add(getFilmData(cursor));
 
         cursor.close();
-        return film;
+        return films;
     }
 
     //получаем фильмов по жанру и году с ограничением
-    public Film[] getFilmsByGenreLimited(String genre, int premiered, int limit) {
+    public ArrayList<Film> getFilmsByGenreLimited(String genre, int premiered, int limit) {
         String genreParam = "%" + genre + "%";
-        Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, titles.plot, " +
-                "ratings.rating, ratings.votes " +
+        Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like ? AND titles.premiered > ? LIMIT ?", new String[]{genreParam, String.valueOf(premiered), String.valueOf(limit)});
-        Film[] film = new Film[cursor.getCount()];
-        int n = 0;
+        ArrayList<Film> films = new ArrayList<>();
         while (cursor.moveToNext())
-            film[n++] = getFilmData(cursor);
+            films.add(getFilmData(cursor));
 
         cursor.close();
-        return film;
+        return films;
     }
 
     //получение фильмов по жанру
     public Cursor getFilmsByGenre(String genre) {
         String genreParam = "%" + genre + "%";
-        Cursor cursor = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, titles.plot, " +
-                "ratings.rating, ratings.votes " +
+        Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like ? " +
                 "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{genreParam});
@@ -115,8 +110,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         Film[] films = new Film[cursor.getCount()];
         int n = 0;
         while (cursor.moveToNext()) {
-            Cursor cursor_films = database.rawQuery("SELECT titles.title_id, titles.genres, titles.premiered, titles.runtime_minutes, titles.is_adult, titles.primary_title, titles.plot, " +
-                    " ratings.rating, ratings.votes " +
+            Cursor cursor_films = database.rawQuery("SELECT * " +
                     "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id WHERE titles.title_id = ?", new String[]{cursor.getString(cursor.getColumnIndex("title_id"))});
             cursor_films.moveToFirst();
             films[n++] = getFilmData(cursor_films);
@@ -149,5 +143,22 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 cursor.getString(cursor.getColumnIndex("is_adult")),
                 cursor.getString(cursor.getColumnIndex("genres")),
                 cursor.getString(cursor.getColumnIndex("plot")));
+    }
+
+    public ArrayList<Film> searchFilms(String text) {
+        String param = "%" + text + "%";
+
+        Cursor cursor = database.rawQuery("SELECT * " +
+                "                FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                "                WHERE titles.primary_title like ? " +
+                "                ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{param});
+
+        ArrayList<Film> films = new ArrayList<>();
+        while (cursor.moveToNext())
+            films.add(getFilmData(cursor));
+
+        cursor.close();
+
+        return films;
     }
 }
