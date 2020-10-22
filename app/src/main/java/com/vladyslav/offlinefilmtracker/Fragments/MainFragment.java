@@ -52,9 +52,9 @@ public class MainFragment extends Fragment {
                     for (int i = 0; i < genres.length; ++i) {
                         final ArrayList<Film> films;
                         if (genres[i].equals("Popular"))
-                            films = databaseManager.getPopularFilmsLimited(FILMS_IN_ROW);
+                            films = databaseManager.getPopularFilms(FILMS_IN_ROW);
                         else
-                            films = databaseManager.getFilmsByGenreLimited(genres[i], 2015, FILMS_IN_ROW);
+                            films = databaseManager.getFilmsByGenre(genres[i], 2015, FILMS_IN_ROW);
 
                         //устанавливаем полученные фильмы в строки в UI потоке
                         final int finalI = i;

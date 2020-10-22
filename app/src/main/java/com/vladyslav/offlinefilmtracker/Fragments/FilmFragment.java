@@ -65,7 +65,12 @@ public class FilmFragment extends Fragment {
         //устанавливаем основную информацию
         ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(film.getRating() + "\n(" + film.getVotes() + ")");
         ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(film.getTitle());
-        ((ImageView) view.findViewById(R.id.fragment_film_iv_poster)).setImageDrawable(film.getPoster(getContext()));
+
+        ImageView posterView = view.findViewById(R.id.fragment_film_iv_poster);
+        BitmapDrawable poster = film.getPoster(getContext());
+        posterView.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), getContext()) * 3.3),
+                (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * 3.3)));
+        posterView.setImageDrawable(poster);
 
         //устанавливаем жанры фильма
         String[] genres = film.getGenres();

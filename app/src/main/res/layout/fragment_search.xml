@@ -1,29 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_search_ll_main"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical"
     tools:context=".Fragments.SearchFragment">
 
-    <EditText
-        android:id="@+id/enter"
+    <AutoCompleteTextView
+        android:id="@+id/fragment_search_act_suggest"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        android:hint="ENTER TEXT"/>
+        android:completionThreshold="1"
+        android:hint="Enter film name"
+        android:singleLine="true" />
 
-    <Button
-        android:id="@+id/pass"
-        android:layout_width="wrap_content"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragment_search_fragment_container"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="pass"/>
+        android:visibility="gone" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler"
+        android:id="@+id/fragment_search_rv_films"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:orientation="vertical" />
+
+    <ProgressBar
+        android:id="@+id/fragment_search_pb_loading"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

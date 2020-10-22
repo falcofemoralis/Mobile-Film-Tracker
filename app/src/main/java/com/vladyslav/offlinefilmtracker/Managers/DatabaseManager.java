@@ -10,6 +10,7 @@ import com.vladyslav.offlinefilmtracker.Objects.Film;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 //SINGLETON
 public class DatabaseManager extends SQLiteOpenHelper {
@@ -44,7 +45,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получение популярных фильмов
-    public ArrayList<Film> getPopularFilmsLimited(int limit) {
+    public ArrayList<Film> getPopularFilms(int limit) {
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
@@ -58,7 +59,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получаем фильмов по жанру и году с ограничением
-    public ArrayList<Film> getFilmsByGenreLimited(String genre, int premiered, int limit) {
+    public ArrayList<Film> getFilmsByGenre(String genre, int premiered, int limit) {
         String genreParam = "%" + genre + "%";
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
@@ -145,20 +146,31 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 cursor.getString(cursor.getColumnIndex("plot")));
     }
 
-    public ArrayList<Film> searchFilms(String text) {
-        String param = "%" + text + "%";
-
-        Cursor cursor = database.rawQuery("SELECT * " +
-                "                FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "                WHERE titles.primary_title like ? " +
-                "                ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{param});
-
-        ArrayList<Film> films = new ArrayList<>();
+    //получение фильмов по жанру
+    public HashMap<String, String> getAllFilms() {
+        Cursor cursor = database.rawQuery("SELECT titles.primary_title, titles.title_id " +
+                "FROM titles", null);
+        HashMap<String, String> films = new HashMap<>();
         while (cursor.moveToNext())
-            films.add(getFilmData(cursor));
+            films.put(cursor.getString(cursor.getColumnIndex("primary_title")), cursor.getString(cursor.getColumnIndex("title_id")));
 
         cursor.close();
-
         return films;
+    }
+
+    public Film getFilmByTitleId(String titleId) {
+        Cursor cursor = database.rawQuery("SELECT * " +
+                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                "WHERE titles.title_id = ?", new String[]{titleId});
+        cursor.moveToFirst();
+        return getFilmData(cursor);
+    }
+
+    public Cursor getFilmByTitle(String title) {
+        String titleParam = "%" + title + "%";
+        Cursor cursor = database.rawQuery("SELECT * " +
+                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                "WHERE titles.primary_title like ?", new String[]{titleParam});
+        return cursor;
     }
 }
