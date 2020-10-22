@@ -74,9 +74,9 @@ public class SearchFragment extends Fragment {
                                     if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT)) {
                                         editText.dismissDropDown();
                                         String text = editText.getText().toString();
-                                        if(text.equals("")) {
+                                        if (text.equals("")) {
                                             Toast.makeText(getContext(), "Enter film name!", Toast.LENGTH_SHORT).show();
-                                        }else {
+                                        } else {
                                             hintLayout.setVisibility(View.GONE);
                                             getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, CategoryFragment.newInstance(text, false)).commit();
                                         }

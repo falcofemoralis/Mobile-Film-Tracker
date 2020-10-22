@@ -9,7 +9,6 @@ import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 //SINGLETON

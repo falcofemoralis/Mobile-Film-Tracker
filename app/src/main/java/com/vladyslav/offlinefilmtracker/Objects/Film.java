@@ -2,9 +2,7 @@ package com.vladyslav.offlinefilmtracker.Objects;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
-
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
-
 import java.io.Serializable;
 import java.util.Arrays;
 

@@ -1,6 +1,5 @@
 package com.vladyslav.offlinefilmtracker.Objects;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 import android.view.LayoutInflater;
@@ -11,7 +10,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.vladyslav.offlinefilmtracker.Fragments.FilmFragment;
@@ -22,9 +20,9 @@ import com.vladyslav.offlinefilmtracker.R;
 import java.util.ArrayList;
 
 public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.ViewHolder> {
-    private LayoutInflater inflater;
-    private ArrayList<Film> films;
-    private Context context;
+    private final LayoutInflater inflater;
+    private final ArrayList<Film> films;
+    private final Context context;
 
     public FilmAdapter(Context context, ArrayList<Film> films) {
         this.context = context;

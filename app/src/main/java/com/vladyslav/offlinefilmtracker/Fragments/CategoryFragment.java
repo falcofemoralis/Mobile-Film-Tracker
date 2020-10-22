@@ -25,13 +25,13 @@ import java.util.ArrayList;
 public class CategoryFragment extends Fragment {
     private static final String ARG_GENRE = "param1", ARG_ISGENRE = "param2";
     private static final int FILMS_PER_SCROLL = 18;
+    private final ArrayList<Film> films = new ArrayList<>();
+    FilmAdapter adapter;
+    ProgressBar progressBar;
     private String genre;
     private View view;
     private NestedScrollView scrollView;
     private Cursor filmsCursor;
-    private final ArrayList<Film> films = new ArrayList<>();
-    FilmAdapter adapter;
-    ProgressBar progressBar;
     private boolean isGenre;
 
     public static CategoryFragment newInstance(String genre, boolean isGenre) {
