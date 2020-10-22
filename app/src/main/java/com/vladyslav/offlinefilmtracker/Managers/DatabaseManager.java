@@ -45,28 +45,30 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получение популярных фильмов
-    public ArrayList<Film> getPopularFilms(int limit) {
+    public Film[] getPopularFilms(int limit) {
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
                 "ORDER BY ratings.votes DESC LIMIT ?", new String[]{String.valueOf(limit)});
-        ArrayList<Film> films = new ArrayList<>();
+        Film[] films = new Film[cursor.getCount()];
+        int n = 0;
         while (cursor.moveToNext())
-            films.add(getFilmData(cursor));
+            films[n++] = getFilmData(cursor);
 
         cursor.close();
         return films;
     }
 
     //получаем фильмов по жанру и году с ограничением
-    public ArrayList<Film> getFilmsByGenre(String genre, int premiered, int limit) {
+    public Film[] getFilmsByGenre(String genre, int premiered, int limit) {
         String genreParam = "%" + genre + "%";
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like ? AND titles.premiered > ? LIMIT ?", new String[]{genreParam, String.valueOf(premiered), String.valueOf(limit)});
-        ArrayList<Film> films = new ArrayList<>();
+        Film[] films = new Film[cursor.getCount()];
+        int n = 0;
         while (cursor.moveToNext())
-            films.add(getFilmData(cursor));
+            films[n++] = getFilmData(cursor);
 
         cursor.close();
         return films;

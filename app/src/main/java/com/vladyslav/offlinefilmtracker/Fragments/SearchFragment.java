@@ -13,7 +13,6 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.TextView;
 
-import androidx.core.widget.NestedScrollView;
 import androidx.fragment.app.Fragment;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
@@ -26,6 +25,7 @@ import java.util.HashMap;
 public class SearchFragment extends Fragment {
     View view;
     AutoCompleteTextView editText;
+    InputMethodManager imm;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -37,6 +37,7 @@ public class SearchFragment extends Fragment {
                              Bundle savedInstanceState) {
         view = inflater.inflate(R.layout.fragment_search, container, false);
         editText = view.findViewById(R.id.fragment_search_act_suggest);
+        imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
 
         final HashMap<String, String> films = DatabaseManager.getInstance(getContext()).getAllFilms();
         ArrayList<String> filmsTitles = new ArrayList<>(films.keySet());
@@ -47,7 +48,6 @@ public class SearchFragment extends Fragment {
         editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
                 imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
 
                 String titleId = films.get(editText.getText().toString());
@@ -60,6 +60,7 @@ public class SearchFragment extends Fragment {
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 if ((actionId == EditorInfo.IME_ACTION_DONE)) {
                     editText.dismissDropDown();
+                    getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, CategoryFragment.newInstance(editText.getText().toString(), false)).commit();
                 }
                 return false;
             }

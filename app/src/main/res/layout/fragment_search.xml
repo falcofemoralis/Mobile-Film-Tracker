@@ -10,27 +10,20 @@
     <AutoCompleteTextView
         android:id="@+id/fragment_search_act_suggest"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/white"
+        android:layout_height="40dp"
+        android:layout_margin="20dp"
+        android:background="@color/main_color_2"
         android:completionThreshold="1"
+        android:drawableStart="@drawable/ic_baseline_search_24"
+        android:drawableTint="@color/white"
         android:hint="Enter film name"
-        android:singleLine="true" />
+        android:paddingStart="10dp"
+        android:singleLine="true"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white" />
 
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/fragment_search_fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fragment_search_rv_films"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:orientation="vertical" />
-
-    <ProgressBar
-        android:id="@+id/fragment_search_pb_loading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

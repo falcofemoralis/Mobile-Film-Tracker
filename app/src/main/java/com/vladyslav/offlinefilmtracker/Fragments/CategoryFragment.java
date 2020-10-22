@@ -23,7 +23,7 @@ import com.vladyslav.offlinefilmtracker.R;
 import java.util.ArrayList;
 
 public class CategoryFragment extends Fragment {
-    private static final String ARG_GENRE = "param1";
+    private static final String ARG_GENRE = "param1", ARG_ISGENRE = "param2";
     private static final int FILMS_PER_SCROLL = 18;
     private String genre;
     private View view;
@@ -32,11 +32,13 @@ public class CategoryFragment extends Fragment {
     private final ArrayList<Film> films = new ArrayList<>();
     FilmAdapter adapter;
     ProgressBar progressBar;
+    private boolean isGenre;
 
-    public static CategoryFragment newInstance(String genre) {
+    public static CategoryFragment newInstance(String genre, boolean isGenre) {
         CategoryFragment fragment = new CategoryFragment();
         Bundle args = new Bundle();
         args.putString(ARG_GENRE, genre);
+        args.putBoolean(ARG_ISGENRE, isGenre);
         fragment.setArguments(args);
         return fragment;
     }
@@ -46,6 +48,7 @@ public class CategoryFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             genre = getArguments().getString(ARG_GENRE);
+            isGenre = getArguments().getBoolean(ARG_ISGENRE);
         }
     }
 
@@ -54,6 +57,12 @@ public class CategoryFragment extends Fragment {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_category, container, false);
             progressBar = view.findViewById(R.id.fragment_category_pb_loading);
+
+            //устанаваливаем заголовок
+            TextView genreText = view.findViewById(R.id.fragment_category_films_tv_header);
+            if (isGenre) genreText.setText(genre + " films");
+            else genreText.setVisibility(View.GONE);
+
             setFilms();
         }
         return view;
@@ -70,9 +79,6 @@ public class CategoryFragment extends Fragment {
         //получаем необходимые лаяуты
         scrollView = getActivity().findViewById(R.id.nestedScrollView);
         final RecyclerView recyclerView = view.findViewById(R.id.fragment_category_films_rv_films);
-
-        //устанаваливаем заголовок
-        ((TextView) view.findViewById(R.id.fragment_category_films_tv_header)).setText(genre + " films");
 
         //получаем фильмы
         addFilms(new Runnable() {
@@ -109,8 +115,12 @@ public class CategoryFragment extends Fragment {
     //устанавливаем фильмы в количестве n штук
     public void addFilms(final Runnable runnable) {
         final Handler mHandler = new Handler(Looper.getMainLooper());
-        if (filmsCursor == null)
-            filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(genre);
+        if (filmsCursor == null) {
+            if (isGenre)
+                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(genre);
+            else
+                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmByTitle(genre);
+        }
 
         progressBar.setVisibility(View.VISIBLE);
 
