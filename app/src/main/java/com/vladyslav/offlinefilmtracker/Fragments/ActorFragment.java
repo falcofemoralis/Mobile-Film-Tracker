@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.Objects.FilmAdapter;
@@ -118,6 +119,10 @@ public class ActorFragment extends Fragment {
                         for (int i = 0; i < filmByRoles.size(); ++i) {
                             if (filmByRoles.get(i).size() != 0) {
                                 TextView textView = new TextView(getContext());
+
+                                LinearLayout.LayoutParams textLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                textLayoutParams.setMarginStart(ResourcesManager.getPxFromDp(15,getContext()));
+                                textView.setLayoutParams(textLayoutParams);
                                 textView.setTextAppearance(R.style.Header);
 
                                 String role = getKey(rolesMap, i);

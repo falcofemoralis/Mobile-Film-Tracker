@@ -2,7 +2,10 @@ package com.vladyslav.offlinefilmtracker.Objects;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
+
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
+
+import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -40,7 +43,12 @@ public class Film implements Serializable {
     }
 
     public BitmapDrawable getPoster(Context context) {
-        return ResourcesManager.getInstance(context).getDrawableById(film_id, true);
+        try {
+            return ResourcesManager.getInstance(context).getDrawableById(film_id, true);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
     public String getRuntime_minutes() {

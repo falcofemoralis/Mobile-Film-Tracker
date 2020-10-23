@@ -5,6 +5,7 @@
     android:id="@+id/fragment_actor_films_ll_main"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_margin="5dp"
     android:orientation="vertical"
     tools:context=".Fragments.ActorFragment">
 

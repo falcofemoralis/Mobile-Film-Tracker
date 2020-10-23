@@ -1,5 +1,9 @@
 package com.vladyslav.offlinefilmtracker.Activities;
 
+import android.app.ProgressDialog;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 
@@ -13,16 +17,59 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vladyslav.offlinefilmtracker.Fragments.MainFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.SearchFragment;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
+import com.vladyslav.offlinefilmtracker.Services.DownloadService;
+
+import java.io.IOException;
+import java.util.concurrent.Callable;
 
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fm; //менеджер фрагментов
+    public static Callable callable;
+    public static ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //скачивание файлов
+        try {
+            ResourcesManager.getInstance(getApplicationContext());
+            setBottomBar();
+        } catch (IOException e) {
+            final Intent intent = new Intent(this, DownloadService.class);
+
+            progressDialog = new ProgressDialog(MainActivity.this);
+            progressDialog.setTitle("Downloading 3 files");
+            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+            progressDialog.setCanceledOnTouchOutside(false);
+            progressDialog.setButton(ProgressDialog.BUTTON_NEUTRAL,
+                    "Close",
+                    new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            stopService(intent);
+                        }
+                    });
+
+
+            callable = new Callable() {
+                @Override
+                public Object call() throws Exception {
+                   // setBottomBar();
+                    return null;
+                }
+            };
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                startForegroundService(intent);
+            else startService(intent);
+        }
+    }
+
+    public void setBottomBar() {
         fm = getSupportFragmentManager(); // получаем менджер фрагментов
         FragmentHelper.init(fm, this);
 
@@ -47,6 +94,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+
         //устанавливаем изначальный фрагмент
         bottomNavigationView.setSelectedItemId(R.id.nav_movies);
     }
@@ -69,3 +117,7 @@ public class MainActivity extends AppCompatActivity {
         super.onBackPressed();
     }
 }
+
+
+
+
