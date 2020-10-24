@@ -12,22 +12,20 @@
 
     <TextView
         android:id="@+id/film_title"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:maxEms="7"
-        android:singleLine="false"
+        android:breakStrategy="balanced"
         android:text="Film title"
         android:textColor="@color/white"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
     <TextView
         android:id="@+id/film_rating"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:maxEms="7"
         android:singleLine="false"
         android:text="Rating"
         android:textColor="#C8C8C8"
-        android:textSize="12sp" />
+        android:textSize="14sp" />
 
 </LinearLayout>

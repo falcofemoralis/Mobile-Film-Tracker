@@ -11,18 +11,18 @@
         android:layout_gravity="center" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:breakStrategy="balanced"
         android:gravity="center"
-        android:maxEms="4"
-        android:singleLine="false"
         android:text="Andy Samberg"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
     <TextView
-        android:layout_width="wrap_content"
+        android:layout_width="100dp"
         android:layout_height="wrap_content"
+        android:breakStrategy="balanced"
         android:gravity="center"
         android:text="Role in film"
         android:textColor="@color/main_color_3"

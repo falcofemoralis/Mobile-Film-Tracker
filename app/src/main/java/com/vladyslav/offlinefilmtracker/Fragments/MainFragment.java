@@ -21,7 +21,7 @@ import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class MainFragment extends Fragment {
-    private final double POSTER_SCALE_FACTOR = 2; //размер постеров у фильмов
+    private final double POSTER_SCALE_FACTOR = 0.40; //размер постеров у фильмов
     private final int FILMS_IN_ROW = 7; //кол-во фильмов в строке
     private LinearLayout baseLayout; //базовый лаяут
     private View view;
@@ -87,13 +87,19 @@ public class MainFragment extends Fragment {
         //ставим постер
         BitmapDrawable poster = film.getPoster(getContext());
         ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
-        filmPoster.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), getContext()) * POSTER_SCALE_FACTOR),
-                (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * POSTER_SCALE_FACTOR)));
+
+        int posterHeight = ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext());
+        int posterWidth = ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext());
+
+        filmPoster.setLayoutParams(new LinearLayout.LayoutParams(posterWidth, posterHeight));
         filmPoster.setImageDrawable(poster);
-        moreBtnHeight = (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * POSTER_SCALE_FACTOR);
+        moreBtnHeight = posterHeight;
 
         //ставим основную информацию
-        ((TextView) filmLayout.getChildAt(1)).setText(film.getTitle());
+        TextView titleView = ((TextView) filmLayout.getChildAt(1));
+        titleView.setText(film.getTitle());
+        titleView.setWidth(posterWidth);
+
         ((TextView) filmLayout.getChildAt(2)).setText(film.getRating());
 
         //добавляем нажатие для перехода на фрагмент фильма

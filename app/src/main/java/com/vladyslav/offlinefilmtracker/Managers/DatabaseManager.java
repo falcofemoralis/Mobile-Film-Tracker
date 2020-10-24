@@ -35,6 +35,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return instance;
     }
 
+    public static void delete() {
+        instance = null;
+    }
+
+
     @Override
     public void onCreate(SQLiteDatabase db) {
     }

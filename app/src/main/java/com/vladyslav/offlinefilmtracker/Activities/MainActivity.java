@@ -43,14 +43,17 @@ public class MainActivity extends AppCompatActivity {
         if (resourcesManager.photosZip == null) {
             links.add("https://dl.dropboxusercontent.com/s/7f0ftnfup1bmtjn/photos.zip?dl=0");
             links.add(path + "photos.zip");
+            ResourcesManager.delete();
         }
         if (resourcesManager.postersZip == null) {
             links.add("https://dl.dropboxusercontent.com/s/92vwcr52oqdtrrj/posters.zip?dl=0");
             links.add(path + "posters.zip");
+            ResourcesManager.delete();
         }
         if (DatabaseManager.getInstance(this) == null) {
             links.add("https://dl.dropboxusercontent.com/s/8zf11wdboxqb55y/imdb.db?dl=0");
             links.add(path + "imdb.db");
+            DatabaseManager.delete();
         }
 
         if (links.size() > 0) {
@@ -58,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             intent.putStringArrayListExtra("links", links);
 
             progressDialog = new ProgressDialog(MainActivity.this);
-            progressDialog.setTitle("Downloading 3 files");
+            progressDialog.setTitle("Downloading files");
             progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
             progressDialog.setCanceledOnTouchOutside(false);
             progressDialog.setButton(ProgressDialog.BUTTON_NEUTRAL,

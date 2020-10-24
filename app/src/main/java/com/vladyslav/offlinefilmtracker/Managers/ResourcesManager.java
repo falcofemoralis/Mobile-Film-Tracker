@@ -37,10 +37,14 @@ public class ResourcesManager {
         return instance;
     }
 
+    public static void delete() {
+        instance = null;
+    }
+
     //перевод пикселей  в dp
-    public static int getDpFromPx(int px, Context context) {
+    public static int getDpFromPx(int px, double size, Context context) {
         float scale = context.getResources().getDisplayMetrics().density;
-        return (int) ((px - 0.5f) / scale);
+        return (int) ((px * scale) * size);
     }
 
     //перевод dp в пиксели

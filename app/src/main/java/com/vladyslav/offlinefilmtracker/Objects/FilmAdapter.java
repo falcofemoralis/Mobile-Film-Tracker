@@ -43,8 +43,8 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.ViewHolder> {
 
         //ставим постер
         BitmapDrawable poster = film.getPoster(context);
-        holder.posterView.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), context) * 2.3),
-                (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), context) * 2.3)));
+        holder.posterView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), 2.3, context)),
+                (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), 2.3, context))));
         holder.posterView.setImageDrawable(poster);
 
         //устанавливаем название и рейтинг фильма

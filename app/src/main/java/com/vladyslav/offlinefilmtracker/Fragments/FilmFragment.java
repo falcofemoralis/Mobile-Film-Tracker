@@ -26,6 +26,8 @@ import com.vladyslav.offlinefilmtracker.R;
 import java.util.ArrayList;
 
 public class FilmFragment extends Fragment {
+    private final double POSTER_SCALE_FACTOR = 0.55; //размер постеров у фильмов
+    private final double PHOTO_SCALE_FACTOR = 1.5; //размер фото у актеров
     private static final String ARG_FILM = "param1";
     private DatabaseManager databaseManager;
     private Film film;
@@ -68,8 +70,8 @@ public class FilmFragment extends Fragment {
 
         ImageView posterView = view.findViewById(R.id.fragment_film_iv_poster);
         BitmapDrawable poster = film.getPoster(getContext());
-        posterView.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), getContext()) * 3.3),
-                (int) (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), getContext()) * 3.3)));
+        posterView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext())),
+                (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext()))));
         posterView.setImageDrawable(poster);
 
         //устанавливаем жанры фильма
@@ -151,8 +153,8 @@ public class FilmFragment extends Fragment {
         //ставим постер
         BitmapDrawable photo = actor.getPhoto(getContext());
         ImageView photoView = (ImageView) layout.getChildAt(0);
-        photoView.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(photo.getBitmap().getWidth(), getContext()) * 8),
-                (int) (ResourcesManager.getDpFromPx(photo.getBitmap().getHeight(), getContext()) * 8)));
+        photoView.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(photo.getBitmap().getWidth(), PHOTO_SCALE_FACTOR, getContext())),
+                (int) (ResourcesManager.getDpFromPx(photo.getBitmap().getHeight(), PHOTO_SCALE_FACTOR, getContext()))));
         photoView.setImageDrawable(photo);
 
         ((TextView) layout.getChildAt(1)).setText(actor.getName());
