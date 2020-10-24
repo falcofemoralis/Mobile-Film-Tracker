@@ -16,30 +16,46 @@ import androidx.fragment.app.FragmentManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.vladyslav.offlinefilmtracker.Fragments.MainFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.SearchFragment;
+import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Services.DownloadService;
 
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fm; //менеджер фрагментов
     public static Callable callable;
     public static ProgressDialog progressDialog;
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        //скачивание файлов
-        try {
-            ResourcesManager.getInstance(getApplicationContext());
-            setBottomBar();
-        } catch (IOException e) {
-            final Intent intent = new Intent(this, DownloadService.class);
+        String path = this.getObbDir().getPath() + "/";
+        ArrayList<String> links = new ArrayList<>();
+        
+        ResourcesManager resourcesManager = ResourcesManager.getInstance(getApplicationContext());
+        if (resourcesManager.photosZip == null) {
+            links.add("https://dl.dropboxusercontent.com/s/7f0ftnfup1bmtjn/photos.zip?dl=0");
+            links.add(path + "photos.zip");
+        }
+        if (resourcesManager.postersZip == null) {
+            links.add("https://dl.dropboxusercontent.com/s/92vwcr52oqdtrrj/posters.zip?dl=0");
+            links.add(path + "posters.zip");
+        }
+        if (DatabaseManager.getInstance(this) == null) {
+            links.add("https://dl.dropboxusercontent.com/s/8zf11wdboxqb55y/imdb.db?dl=0");
+            links.add(path + "imdb.db");
+        }
+
+        if (links.size() > 0) {
+            intent = new Intent(this, DownloadService.class);
+            intent.putStringArrayListExtra("links", links);
 
             progressDialog = new ProgressDialog(MainActivity.this);
             progressDialog.setTitle("Downloading 3 files");
@@ -53,12 +69,12 @@ public class MainActivity extends AppCompatActivity {
                             stopService(intent);
                         }
                     });
-
+            progressDialog.show();
 
             callable = new Callable() {
                 @Override
                 public Object call() throws Exception {
-                   // setBottomBar();
+                    setBottomBar();
                     return null;
                 }
             };
@@ -66,6 +82,8 @@ public class MainActivity extends AppCompatActivity {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 startForegroundService(intent);
             else startService(intent);
+        } else {
+            setBottomBar();
         }
     }
 
@@ -115,6 +133,12 @@ public class MainActivity extends AppCompatActivity {
             }, 20);
         }
         super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (intent != null) stopService(intent);
+        super.onDestroy();
     }
 }
 

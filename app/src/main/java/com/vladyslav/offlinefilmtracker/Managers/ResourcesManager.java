@@ -13,16 +13,24 @@ public class ResourcesManager {
     private static ResourcesManager instance;
     public ZipResourceFile photosZip, postersZip;
 
-    public ResourcesManager(Context context) throws IOException {
-        //  String obbFilePath = context.getObbDir().getPath() + "/main.1.com.vladyslav.offlinefilmtracker.obb";
+    public ResourcesManager(Context context) {
         String obbFilePath = context.getObbDir().getPath();
 
-        photosZip = new ZipResourceFile(obbFilePath + "/photos.zip");
-        postersZip = new ZipResourceFile(obbFilePath + "/posters.zip");
+        try {
+            photosZip = new ZipResourceFile(obbFilePath + "/photos.zip");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            postersZip = new ZipResourceFile(obbFilePath + "/posters.zip");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
     }
 
-    public static ResourcesManager getInstance(Context context) throws IOException {
+    public static ResourcesManager getInstance(Context context) {
         if (instance == null) {
             instance = new ResourcesManager(context);
         }

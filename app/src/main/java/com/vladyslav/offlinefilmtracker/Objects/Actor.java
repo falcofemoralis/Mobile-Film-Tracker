@@ -5,7 +5,6 @@ import android.graphics.drawable.BitmapDrawable;
 
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 
-import java.io.IOException;
 import java.io.Serializable;
 import java.util.Arrays;
 
@@ -56,12 +55,7 @@ public class Actor implements Serializable {
     }
 
     public BitmapDrawable getPhoto(Context context) {
-        try {
-            return ResourcesManager.getInstance(context).getDrawableById(person_id, false);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+        return ResourcesManager.getInstance(context).getDrawableById(person_id, false);
     }
 
     @Override
