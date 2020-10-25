@@ -15,7 +15,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="15dp"
-        android:text="Ridley Scott"
+        android:text="Actor name"
         android:textColor="#FFFFFF"
         android:textSize="22sp" />
 
@@ -42,7 +42,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Born: 1980"
+                android:text="Born text"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp" />
 
@@ -51,7 +51,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="Died: alive"
+                android:text="Died text"
                 android:textColor="#FFFFFF"
                 android:textSize="18sp" />
         </LinearLayout>

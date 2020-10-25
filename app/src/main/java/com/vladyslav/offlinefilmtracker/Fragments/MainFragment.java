@@ -34,11 +34,11 @@ public class MainFragment extends Fragment {
     private int moreBtnHeight; //размер кнопки More
 
     //лист пар из ключа жанра (в базе) и id строковой константы
-    private final ArrayList<Pair<String, Integer>> GENRES = new ArrayList<Pair<String, Integer>>() {
+    public final ArrayList<Pair<String, Integer>> genres = new ArrayList<Pair<String, Integer>>() {
         {
             add(new Pair<>("Popular", R.string.genre_popular));
             add(new Pair<>("Action", R.string.genre_action));
-            add(new Pair<>("Sci-Fi", R.string.genre_scifi));
+            add(new Pair<>("Sci-Fi", R.string.genre_sciFi));
             add(new Pair<>("Fantasy", R.string.genre_fantasy));
             add(new Pair<>("Comedy", R.string.genre_comedy));
             add(new Pair<>("Animation", R.string.genre_animation));
@@ -57,7 +57,6 @@ public class MainFragment extends Fragment {
         return view;
     }
 
-
     //загружаем фильмы из базы по жанрам
     public void getFilmsFromDatabase() {
         final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -65,39 +64,44 @@ public class MainFragment extends Fragment {
             public void run() {
                 databaseManager = DatabaseManager.getInstance(view.getContext());
                 //получаем фильмы по жанру
-                for (int i = 0; i < GENRES.size(); ++i) {
+                for (final Pair<String, Integer> genre : genres) {
+                    final String genreString = genre.first;
+
                     final Film[] films;
-                    if (GENRES.get(i).first.equals("Popular"))
+                    if (genreString.equals("Popular")) {
                         films = databaseManager.getPopularFilms(FILMS_IN_ROW);
-                    else
-                        films = databaseManager.getFilmsByGenre(GENRES.get(i).first, 2015, FILMS_IN_ROW);
+                    } else {
+                        films = databaseManager.getFilmsByGenre(genreString, 2015, FILMS_IN_ROW);
+                    }
 
                     //устанавливаем полученные фильмы в строки
-                    final int finalI = i;
                     mHandler.post(new Runnable() {
                         public void run() {
-                            createFilmRow(films, GENRES.get(finalI));
-                            if (finalI == GENRES.size() - 1) {
-                                getActivity().findViewById(R.id.progress_bar).setVisibility(View.GONE);
-                                getActivity().findViewById(R.id.main_fragment_container).setVisibility(View.VISIBLE);
-                            }
+                            createFilmRow(films, genreString, genre.second);
+
                         }
                     });
                 }
+                mHandler.post(new Runnable() {
+                    public void run() {
+                        getActivity().findViewById(R.id.progress_bar).setVisibility(View.GONE);
+                        getActivity().findViewById(R.id.main_fragment_container).setVisibility(View.VISIBLE);
+                    }
+                });
             }
         }).start();
     }
 
     //создаем ряд с фильмами
-    public void createFilmRow(Film[] films, Pair<String, Integer> genre) {
+    public void createFilmRow(Film[] films, String genre, int genreStringId) {
         LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //строка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, getString(genre.second))); //устанавливаем заголовок строки
+        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, getString(genreStringId))); //устанавливаем заголовок строки
 
         LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         for (int i = 0; i < FILMS_IN_ROW; i++)
             addFilm(films[i], linearLayout);
 
-        if (!genre.first.equals("Popular")) addMoreBtn(linearLayout, genre.first);
+        if (!genre.equals("Popular")) addMoreBtn(linearLayout, genre);
         baseLayout.addView(filmsLayout); //добавляем в корень
     }
 

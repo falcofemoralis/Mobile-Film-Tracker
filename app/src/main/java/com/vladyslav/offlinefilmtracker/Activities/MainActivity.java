@@ -38,6 +38,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        //инциализация помошника по фрагментам
+        fm = getSupportFragmentManager();
+        FragmentHelper.init(fm, this);
+
         //производится проверка наличия файлов
         checkFiles(new Runnable() {
             @Override
@@ -107,9 +111,6 @@ public class MainActivity extends AppCompatActivity {
 
     //метод установки боттом бара (запускается главный фрагмент)
     public void setBottomBar() {
-        fm = getSupportFragmentManager();
-        FragmentHelper.init(fm, this);
-
         final Fragment mainFragment = new MainFragment(); //главный фрагмент
         final Fragment searchFragment = new SearchFragment(); //фрагмент поиска
 
@@ -118,13 +119,12 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 switch (item.getItemId()) {
                     case R.id.nav_movies:
-                        fm.beginTransaction().replace(R.id.main_fragment_container, mainFragment).commit();
+                        FragmentHelper.changeFragment(mainFragment);
                         break;
                     case R.id.nav_search:
-                        fm.beginTransaction().replace(R.id.main_fragment_container, searchFragment).commit();
+                        FragmentHelper.changeFragment(searchFragment);
                         break;
                 }
                 return true;

@@ -89,7 +89,7 @@ public class SearchFragment extends Fragment {
 
                                     //проверяем ведденный текст
                                     if (text.equals("")) {
-                                        Toast.makeText(getContext(), getString(R.string.no_film_entered), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(getContext(), getString(R.string.enter_film_name), Toast.LENGTH_SHORT).show();
                                     } else {
                                         //скрываем подсказку
                                         hintsLayout.setVisibility(View.GONE);

@@ -26,6 +26,7 @@ import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 
 public class FilmFragment extends Fragment {
@@ -78,11 +79,29 @@ public class FilmFragment extends Fragment {
         posterView.setImageDrawable(poster);
 
         //устанавливаем жанры фильма
-        String[] genres = film.getGenres();
+        String[] filmGenres = film.getGenres();
         LinearLayout genresLayout = view.findViewById(R.id.fragment_film_ll_genres);
-        for (String genre : genres) {
+
+        for (String genre : filmGenres) {
             TextView genresTV = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
-            genresTV.setText(genre);
+
+            //поиск строковой константы
+            int stringId = -1;
+            try {
+                //создаем и обрабатываем жанр
+                String genreTemp = genre.substring(0, 1).toLowerCase() + genre.substring(1); //делаем 1 букву низкого регистра
+                genreTemp = genreTemp.replace("-", ""); //удаляем "-" из жанра
+
+                Field idField = R.string.class.getDeclaredField("genre_" + genreTemp);
+                stringId = idField.getInt(idField);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            //если жанр фильма отсуствует в списке жанров
+            if (stringId == -1) genresTV.setText(genre);
+            else genresTV.setText(getString(stringId));
+
             genresLayout.addView(genresTV);
         }
     }
@@ -205,4 +224,6 @@ public class FilmFragment extends Fragment {
         textView.setMovementMethod(LinkMovementMethod.getInstance());
         return ss;
     }
+
+
 }

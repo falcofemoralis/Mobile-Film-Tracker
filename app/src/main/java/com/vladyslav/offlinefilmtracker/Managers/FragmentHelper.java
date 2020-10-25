@@ -26,4 +26,14 @@ public class FragmentHelper {
                 .commit();
         activity.findViewById(R.id.nestedScrollView).scrollTo(0, 0);
     }
+
+    public static void changeFragment(Fragment fragment){
+        fragmentManager.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
+
+        fragmentManager.beginTransaction()
+                .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)
+                .replace(R.id.main_fragment_container, fragment)
+                .commit();
+
+    }
 }

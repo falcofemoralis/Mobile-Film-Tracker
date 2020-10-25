@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Offline Film Tracker</string>
     <string name="dialog_title">Downloading files</string>
@@ -5,7 +6,7 @@
     <string name="service_title">App is running in background</string>
     <string name="genre_popular">Popular</string>
     <string name="genre_action">Action</string>
-    <string name="genre_scifi">Sci-Fi</string>
+    <string name="genre_sciFi">Sci-Fi</string>
     <string name="genre_fantasy">Fantasy</string>
     <string name="genre_comedy">Comedy</string>
     <string name="genre_animation">Animation</string>
@@ -20,7 +21,10 @@
     <string name="actor_born">Born: %1$s</string>
     <string name="actor_died">Died: %1$s</string>
     <string name="unknown">unknown</string>
-    <string name="no_film_entered">Enter film name!"</string>
-
-
+    <string name="enter_film_name">Enter film name!"</string>
+    <string name="movies">Movies</string>
+    <string name="search_for_movie">Search for movie</string>
+    <string name="plot">Plot</string>
+    <string name="cast">Cast</string>
+    <string name="search_hint">Start search for a Movie title in the search bar up above to fetch results</string>
 </resources>
