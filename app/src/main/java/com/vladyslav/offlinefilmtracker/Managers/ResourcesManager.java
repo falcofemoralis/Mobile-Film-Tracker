@@ -41,7 +41,7 @@ public class ResourcesManager {
         instance = null;
     }
 
-    //перевод пикселей  в dp
+    //перевод пикселей в dp
     public static int getDpFromPx(int px, double size, Context context) {
         float scale = context.getResources().getDisplayMetrics().density;
         return (int) ((px * scale) * size);

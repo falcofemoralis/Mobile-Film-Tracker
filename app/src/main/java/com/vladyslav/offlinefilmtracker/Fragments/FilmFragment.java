@@ -7,6 +7,7 @@ import android.text.Spanned;
 import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
@@ -28,10 +31,9 @@ import java.util.ArrayList;
 public class FilmFragment extends Fragment {
     private final double POSTER_SCALE_FACTOR = 0.55; //размер постеров у фильмов
     private final double PHOTO_SCALE_FACTOR = 1.5; //размер фото у актеров
-    private static final String ARG_FILM = "param1";
-    private DatabaseManager databaseManager;
-    private Film film;
-    private View view;
+    private static final String ARG_FILM = "param1"; //параметр объект фильма
+    private Film film; //объект фильма
+    private View view; ///вью фрагмента
 
     public static FilmFragment newInstance(Film film) {
         FilmFragment fragment = new FilmFragment();
@@ -49,11 +51,12 @@ public class FilmFragment extends Fragment {
         }
     }
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_film, container, false);
-            databaseManager = DatabaseManager.getInstance(view.getContext());
+
             setBaseFilmInfo();
             setAdditionalFilmInfo();
             setCrew();
@@ -61,13 +64,13 @@ public class FilmFragment extends Fragment {
         return view;
     }
 
-
-    //устанавливаем основную информацию про фильм
+    //метод установки основонй информации про фильм (рейтинг, название, постер, жанры)
     public void setBaseFilmInfo() {
         //устанавливаем основную информацию
-        ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(film.getRating() + "\n(" + film.getVotes() + ")");
+        ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(getString(R.string.rating, film.getRating(), film.getVotes()));
         ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(film.getTitle());
 
+        //устанавливаем постер
         ImageView posterView = view.findViewById(R.id.fragment_film_iv_poster);
         BitmapDrawable poster = film.getPoster(getContext());
         posterView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext())),
@@ -77,48 +80,48 @@ public class FilmFragment extends Fragment {
         //устанавливаем жанры фильма
         String[] genres = film.getGenres();
         LinearLayout genresLayout = view.findViewById(R.id.fragment_film_ll_genres);
-        for (int i = 0; i < genres.length; ++i) {
+        for (String genre : genres) {
             TextView genresTV = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
-            genresTV.setText(genres[i]);
+            genresTV.setText(genre);
             genresLayout.addView(genresTV);
         }
     }
 
-    //устанавливаем допольнительную информацию про фильм
+    //метод установки допольнительной информации про фильм (дата, время, сюжет и пр)
     public void setAdditionalFilmInfo() {
-        ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText("Release date" + ": " + film.getPremiered());
-        ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText("Runtime" + ": " + film.getRuntime_minutes() + " minutes");
+        ((TextView) view.findViewById(R.id.fragment_film_tv_releaseDate)).setText(getString(R.string.release_date, film.getPremiered()));
+        ((TextView) view.findViewById(R.id.fragment_film_tv_runtime)).setText(getString(R.string.runtime, film.getRuntime_minutes()));
         ((TextView) view.findViewById(R.id.fragment_film_tv_plot)).setText(film.getPlot());
-
 
         TextView adult = view.findViewById(R.id.fragment_film_tv_adult);
         if (film.getIsAdult())
-            adult.setText("18+");
+            adult.setText(R.string.adult);
         else
             adult.setVisibility(View.GONE);
     }
 
-    //устанавливем комманду
+    //метод установки кооманды фильма
     public void setCrew() {
-        Actor[] actors = databaseManager.getActorsByTitleId(film.getFilm_id());
+        Actor[] actors = DatabaseManager.getInstance(view.getContext()).getActorsByTitleId(film.getFilm_id());
         LinearLayout actorsLayout = view.findViewById(R.id.fragment_film_ll_actorsLayout);
 
-        ArrayList<ArrayList<SpannableString>> personsStrings = new ArrayList<>();
+        //список людей по ролям т.е список режисеров, продюсеров и писателей
+        ArrayList<ArrayList<SpannableString>> spannablePersonNamesList = new ArrayList<>();
         for (int i = 0; i < 3; ++i) {
             ArrayList<SpannableString> list = new ArrayList<>();
-            personsStrings.add(list);
+            spannablePersonNamesList.add(list);
         }
 
-        ArrayList<TextView> personsTextViews = new ArrayList<>();
-        personsTextViews.add((TextView) view.findViewById(R.id.fragment_film_tv_directors));
-        personsTextViews.get(0).setText("Director: ");
+        //лист пар из ключа жанра (в базе) и id строковой константы
+        ArrayList<Pair<Integer, Integer>> personRoleTextViews = new ArrayList<Pair<Integer, Integer>>() {
+            {
+                add(new Pair<>(R.id.fragment_film_tv_directors, R.string.directors));
+                add(new Pair<>(R.id.fragment_film_tv_producers, R.string.producers));
+                add(new Pair<>(R.id.fragment_film_tv_writers, R.string.writers));
+            }
+        };
 
-        personsTextViews.add((TextView) view.findViewById(R.id.fragment_film_tv_producers));
-        personsTextViews.get(1).setText("Producers: ");
-
-        personsTextViews.add((TextView) view.findViewById(R.id.fragment_film_tv_writers));
-        personsTextViews.get(2).setText("Writers: ");
-
+        //распределяем людей по типу роли в фильме в списки
         int n;
         for (Actor actor : actors) {
             switch (actor.getCategory()) {
@@ -135,45 +138,55 @@ public class FilmFragment extends Fragment {
                     setActor(actor, actorsLayout);
                     continue;
             }
-            personsStrings.get(n).add(setClickableActorName(personsTextViews.get(n), actor));
+            spannablePersonNamesList.get(n).add(setClickableActorName((TextView) view.findViewById(personRoleTextViews.get(n).first), actor));
         }
 
-        for (int i = 0; i < personsStrings.size(); i++) {
-            for (int j = 0; j < personsStrings.get(i).size(); j++) {
-                personsTextViews.get(i).append(personsStrings.get(i).get(j));
-                if (j != personsStrings.get(i).size() - 1) personsTextViews.get(i).append(", ");
+        //устанавливаем актеров во вьюшки
+        for (int i = 0; i < spannablePersonNamesList.size(); i++) {
+            int size = spannablePersonNamesList.get(i).size();
+            TextView textView = view.findViewById(personRoleTextViews.get(i).first);
+
+            if (size > 0) textView.setText(getString(personRoleTextViews.get(i).second));
+            else textView.setVisibility(View.GONE);
+
+            for (int j = 0; j < size; j++) {
+                textView.append(spannablePersonNamesList.get(i).get(j));
+                if (j != size - 1) textView.append(", ");
             }
         }
     }
 
-    //установка актера в колонку Crew
+    //метод установки актера в строку актеров
     public void setActor(final Actor actor, LinearLayout actorsLayout) {
         LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
 
-        //ставим постер
-        BitmapDrawable photo = actor.getPhoto(getContext());
-        ImageView photoView = (ImageView) layout.getChildAt(0);
-        photoView.setLayoutParams(new LinearLayout.LayoutParams((int) (ResourcesManager.getDpFromPx(photo.getBitmap().getWidth(), PHOTO_SCALE_FACTOR, getContext())),
-                (int) (ResourcesManager.getDpFromPx(photo.getBitmap().getHeight(), PHOTO_SCALE_FACTOR, getContext()))));
-        photoView.setImageDrawable(photo);
-
+        //ставим имя актера
         ((TextView) layout.getChildAt(1)).setText(actor.getName());
 
+        //ставим фото актера
+        BitmapDrawable photo = actor.getPhoto(getContext());
+        ImageView photoView = (ImageView) layout.getChildAt(0);
+        photoView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(photo.getBitmap().getWidth(), PHOTO_SCALE_FACTOR, getContext())),
+                (ResourcesManager.getDpFromPx(photo.getBitmap().getHeight(), PHOTO_SCALE_FACTOR, getContext()))));
+        photoView.setImageDrawable(photo);
+
+        //устанавливаем персонажей актера в фильме
         TextView charactersTV = (TextView) layout.getChildAt(2);
-        charactersTV.setText("");
         for (String character : actor.getCharacters())
             charactersTV.append(character + "\n");
 
+        //добавляем переход на фрагмент актера
         layout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 FragmentHelper.openFragment(ActorFragment.newInstance(actor));
             }
         });
+
         actorsLayout.addView(layout);
     }
 
-    //установка перехода по нажатию на имя режисера, сценариста, продюсера
+    //метод установки перехода по нажатию на имя режисера, сценариста, продюсера при помощи SpannableString
     public SpannableString setClickableActorName(TextView textView, final Actor actor) {
         SpannableString ss = new SpannableString(actor.getName());
         ClickableSpan clickableSpan = new ClickableSpan() {

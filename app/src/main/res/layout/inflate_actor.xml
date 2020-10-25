@@ -15,7 +15,6 @@
         android:layout_height="wrap_content"
         android:breakStrategy="balanced"
         android:gravity="center"
-        android:text="Andy Samberg"
         android:textColor="#FFFFFF"
         android:textSize="12sp" />
 
@@ -24,7 +23,6 @@
         android:layout_height="wrap_content"
         android:breakStrategy="balanced"
         android:gravity="center"
-        android:text="Role in film"
         android:textColor="@color/main_color_3"
         android:textSize="12sp" />
 </LinearLayout>

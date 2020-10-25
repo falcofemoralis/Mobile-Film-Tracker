@@ -29,7 +29,7 @@ import java.util.concurrent.Callable;
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fm; //менеджер фрагментов
     private Intent intent; //интент сервиса скачивания файлов
-    public static Callable callableSetBar; //callable вызова установки боттом бара
+    public static Callable callableStart; //callable вызова установки боттом бара
     public static ProgressDialog progressDialog; //диалог прогресса скачивания файлов
     public static ArrayList<Pair<String, String>> links = new ArrayList<>(); //ссылки для скачивания необходимых файлов
 
@@ -79,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
 
         intent = new Intent(this, DownloadService.class);
         progressDialog = new ProgressDialog(MainActivity.this);
-        progressDialog.setTitle(R.string.downloading_files);
+        progressDialog.setTitle(getString(R.string.dialog_title));
         progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
         progressDialog.setCanceledOnTouchOutside(false);
         progressDialog.setButton(ProgressDialog.BUTTON_NEUTRAL, getString(R.string.close),
@@ -91,9 +91,10 @@ public class MainActivity extends AppCompatActivity {
                 });
         progressDialog.show();
 
-        callableSetBar = new Callable() {
+        callableStart = new Callable() {
             @Override
             public Object call() {
+                progressDialog.hide();
                 setBottomBar();
                 return null;
             }

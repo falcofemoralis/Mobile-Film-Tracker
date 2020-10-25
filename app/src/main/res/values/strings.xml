@@ -1,5 +1,26 @@
 <resources>
     <string name="app_name">Offline Film Tracker</string>
-    <string name="downloading_files">Downloading files</string>
+    <string name="dialog_title">Downloading files</string>
     <string name="close">Close</string>
+    <string name="service_title">App is running in background</string>
+    <string name="genre_popular">Popular</string>
+    <string name="genre_action">Action</string>
+    <string name="genre_scifi">Sci-Fi</string>
+    <string name="genre_fantasy">Fantasy</string>
+    <string name="genre_comedy">Comedy</string>
+    <string name="genre_animation">Animation</string>
+    <string name="films">%1$s films</string>
+    <string name="rating">%1$s\n(%2$s)</string>
+    <string name="release_date">Release date: %1$s</string>
+    <string name="runtime">Runtime: %1$s minutes</string>
+    <string name="adult">18+</string>
+    <string name="directors">Directors: \t</string>
+    <string name="producers">Producers: \t</string>
+    <string name="writers">Writers: \t</string>
+    <string name="actor_born">Born: %1$s</string>
+    <string name="actor_died">Died: %1$s</string>
+    <string name="unknown">unknown</string>
+    <string name="no_film_entered">Enter film name!"</string>
+
+
 </resources>

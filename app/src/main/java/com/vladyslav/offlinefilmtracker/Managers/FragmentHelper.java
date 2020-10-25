@@ -17,6 +17,7 @@ public class FragmentHelper {
         activity = act;
     }
 
+    //метод открытия фрагмента
     public static void openFragment(Fragment fragment) {
         fragmentManager.beginTransaction()
                 .setCustomAnimations(R.anim.fade_in, R.anim.fade_out, R.anim.fade_in, R.anim.fade_out)

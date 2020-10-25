@@ -22,9 +22,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.concurrent.Callable;
 
-import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.callableSetBar;
+import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.callableStart;
 import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.links;
 import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.progressDialog;
 
@@ -38,11 +37,13 @@ public class DownloadService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        //запуск сервиса в фоне в зависимости от версии Т.е. мы создаем уведомление и назначаем ему ID. Сервис переходит в режим неуязвимости, а в статус-баре появится уведомление.
+        //запуск сервиса в фоне в зависимости от версии
+        // Т.е. мы создаем уведомление и назначаем ему ID. Сервис переходит в режим неуязвимости, а в статус-баре появится уведомление.
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O) startMyOwnForeground();
         else startForeground(1, new Notification());
     }
 
+    //метод запуска сервиса в фоне для андроида Oreo и выше
     @RequiresApi(Build.VERSION_CODES.O)
     private void startMyOwnForeground() {
         String NOTIFICATION_CHANNEL_ID = "com.vladyslav.offlinefilmtracker.DownloadService";
@@ -60,7 +61,7 @@ public class DownloadService extends Service {
         //создаем уведомление (то что в верхней части экрана)
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
-                .setContentTitle("App is running in background")
+                .setContentTitle(getString(R.string.service_title))
                 .setPriority(NotificationManager.IMPORTANCE_MIN)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .setSmallIcon(R.drawable.ic_app)
@@ -71,18 +72,8 @@ public class DownloadService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-
-        final Callable stopper = new Callable() {
-            @Override
-            public Object call() throws Exception {
-                stopSelf();
-                return null;
-            }
-        };
-
         final Handler mHandler = new Handler(Looper.getMainLooper());
 
-        //создаем поток
         (new Thread() {
             public void run() {
                 for (int i = 0; i < links.size(); ++i) {
@@ -98,6 +89,7 @@ public class DownloadService extends Service {
                         int count = 0;
                         long total = 0;
 
+                        //получаем максимальный размер файла
                         final int lengthOfFile = connection.getContentLength();
                         mHandler.post(new Runnable() {
                             public void run() {
@@ -105,6 +97,7 @@ public class DownloadService extends Service {
                             }
                         });
 
+                        //скачиваем файл
                         while ((count = inputStream.read(data)) != -1) {
                             total += count;
                             final long finalTotal = total;
@@ -113,8 +106,6 @@ public class DownloadService extends Service {
                                     progressDialog.setProgress(Integer.parseInt(String.valueOf((int) (finalTotal / 1024 / 1024))));
                                 }
                             });
-
-                            // writing data to file
                             outputStream.write(data, 0, count);
                         }
 
@@ -125,16 +116,9 @@ public class DownloadService extends Service {
                     }
                 }
 
-                mHandler.post(new Runnable() {
-                    public void run() {
-                        progressDialog.hide();
-
-                    }
-                });
-
                 try {
-                    stopper.call();
-                    callableSetBar.call();
+                    stopSelf();
+                    callableStart.call();
                 } catch (Exception e) {
                     e.printStackTrace();
                 }

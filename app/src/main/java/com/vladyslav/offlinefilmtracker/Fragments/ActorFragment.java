@@ -12,6 +12,8 @@ import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -28,11 +30,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ActorFragment extends Fragment {
-    private static final String ARG_ACTOR = "param1";
-    private Actor actor;
-    private View view;
-    private LinearLayout mainLayout;
-    private ProgressBar progressBar;
+    private static final String ARG_ACTOR = "param1"; //параметр объекта актера
+    private Actor actor; //объект актера
+    private View view; ///вью фрагмента
+    private LinearLayout baseLayout; //базовый лаяут для добавления списка фильмов
+    private ProgressBar progressBar; //бар загрузки
 
     public static ActorFragment newInstance(Actor actor) {
         ActorFragment fragment = new ActorFragment();
@@ -50,27 +52,40 @@ public class ActorFragment extends Fragment {
         }
     }
 
+    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_actor, container, false);
-            mainLayout = view.findViewById(R.id.fragment_actor_films_ll_main);
+            baseLayout = view.findViewById(R.id.fragment_actor_films_ll_main);
             progressBar = view.findViewById(R.id.fragment_actor_pb_loading);
+
             setActorBaseInfo();
             setFilms();
         }
         return view;
     }
 
-    //устанавливаем базовую информацию актеру
+    //метод установки базовой информации актера (имя, фото, даты рождения/смерти)
     public void setActorBaseInfo() {
         ((TextView) view.findViewById(R.id.fragment_actor_films_tv_name)).setText(actor.getName());
         ((ImageView) view.findViewById(R.id.fragment_actor_films_iv_photo)).setImageDrawable(actor.getPhoto(getContext()));
-        ((TextView) view.findViewById(R.id.fragment_actor_films_tv_born)).setText("Born: " + actor.getBorn());
-        ((TextView) view.findViewById(R.id.fragment_actor_films_tv_died)).setText("Died: " + actor.getDied());
+
+        //установка даты рождения актера
+        TextView bornTV = view.findViewById(R.id.fragment_actor_films_tv_born);
+        String born = actor.getBorn();
+        if (born != null) bornTV.setText(getString(R.string.actor_born, born));
+        else bornTV.setText(getString(R.string.unknown));
+
+        //установка даты смерти актера
+        TextView diedTV = view.findViewById(R.id.fragment_actor_films_tv_died);
+        String died = actor.getDied();
+        if (died != null) diedTV.setText(getString(R.string.actor_died, died));
+        else diedTV.setVisibility(View.GONE);
     }
 
-    //сортируем фильмы по роли
+    //TODO оптимизировать
+    //метод установки фильмов
     public void setFilms() {
         final Handler mHandler = new Handler(Looper.getMainLooper());
 
@@ -88,7 +103,7 @@ public class ActorFragment extends Fragment {
         }
 
         progressBar.setVisibility(View.VISIBLE);
-        //создаем поток
+
         (new Thread() {
             public void run() {
                 //получаем фильмы по жанру
@@ -115,36 +130,38 @@ public class ActorFragment extends Fragment {
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
                         layoutParams.gravity = Gravity.CENTER_HORIZONTAL;
 
-                        //получение всех фильмов акетера
+                        //установка всех фильмов акетера в RecyclerView
                         for (int i = 0; i < filmByRoles.size(); ++i) {
                             if (filmByRoles.get(i).size() != 0) {
+                                //создаем вью заголовка
                                 TextView textView = new TextView(getContext());
-
                                 LinearLayout.LayoutParams textLayoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-                                textLayoutParams.setMarginStart(ResourcesManager.getPxFromDp(15,getContext()));
+                                textLayoutParams.setMarginStart(ResourcesManager.getPxFromDp(15, getContext()));
                                 textView.setLayoutParams(textLayoutParams);
                                 textView.setTextAppearance(R.style.Header);
 
+                                //устанавливаем текст заголовка
                                 String role = getKey(rolesMap, i);
                                 textView.setText(role.substring(0, 1).toUpperCase() + role.substring(1));
-                                mainLayout.addView(textView);
+                                baseLayout.addView(textView);
 
+                                //создаем RecyclerView (список фильмов)
                                 RecyclerView recyclerView = new RecyclerView(getContext());
                                 recyclerView.setLayoutParams(layoutParams);
                                 recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
                                 FilmAdapter adapter = new FilmAdapter(getContext(), filmByRoles.get(i));
                                 recyclerView.setAdapter(adapter);
-                                mainLayout.addView(recyclerView);
+                                baseLayout.addView(recyclerView);
                             }
                         }
                         view.findViewById(R.id.fragment_actor_pb_loading).setVisibility(View.GONE);
-
                     }
                 });
             }
         }).start();
     }
 
+    //метод получаем ключа из хешмапы
     public <K, V> K getKey(Map<K, V> map, V value) {
         for (Map.Entry<K, V> entry : map.entrySet()) {
             if (entry.getValue().equals(value)) {

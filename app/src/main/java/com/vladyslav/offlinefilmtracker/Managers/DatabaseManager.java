@@ -164,6 +164,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return films;
     }
 
+    //получение фильма по id
     public Film getFilmByTitleId(String titleId) {
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
@@ -172,7 +173,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return getFilmData(cursor);
     }
 
-    public Cursor getFilmByTitle(String title) {
+    //получение возможных фильмов по названию
+    public Cursor getFilmsByTitle(String title) {
         String titleParam = "%" + title + "%";
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +

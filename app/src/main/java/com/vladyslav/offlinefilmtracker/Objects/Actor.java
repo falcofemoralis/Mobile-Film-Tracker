@@ -16,13 +16,7 @@ public class Actor implements Serializable {
         this.person_id = person_id;
         this.name = name;
         this.category = category;
-
-        //в случае если неизвестна дата рождения
-        if (born == null) born = "unknown";
         this.born = born;
-
-        //если актер еще жив
-        if (died == null) died = "alive";
         this.died = died;
 
         //т.к данные приходят в формате ["",""], то их нужно разделить
