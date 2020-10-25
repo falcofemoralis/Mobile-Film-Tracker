@@ -27,4 +27,5 @@
     <string name="plot">Plot</string>
     <string name="cast">Cast</string>
     <string name="search_hint">Start search for a Movie title in the search bar up above to fetch results</string>
+    <string name="downloading_error">Failed to download files</string>
 </resources>

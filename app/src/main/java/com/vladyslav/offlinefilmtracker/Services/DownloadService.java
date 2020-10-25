@@ -76,8 +76,8 @@ public class DownloadService extends Service {
 
         (new Thread() {
             public void run() {
-                for (int i = 0; i < links.size(); ++i) {
-                    try {
+                try {
+                    for (int i = 0; i < links.size(); ++i) {
                         URL url = new URL(links.get(i).first);
                         URLConnection connection = url.openConnection();
                         connection.connect();
@@ -111,18 +111,23 @@ public class DownloadService extends Service {
 
                         inputStream.close();
                         outputStream.close();
+                    }
+
+                    try {
+                        stopSelf();
+                        callableStart.call();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                }
-
-                try {
-                    stopSelf();
-                    callableStart.call();
                 } catch (Exception e) {
+                    stopSelf();
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            progressDialog.setTitle(getString(R.string.downloading_error));
+                        }
+                    });
                     e.printStackTrace();
                 }
-
             }
         }).start();
         return START_STICKY;
