@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Pair;
 import android.view.MenuItem;
 
 import androidx.annotation.NonNull;
@@ -27,71 +28,85 @@ import java.util.concurrent.Callable;
 
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fm; //менеджер фрагментов
-    public static Callable callable;
-    public static ProgressDialog progressDialog;
-    private Intent intent;
+    private Intent intent; //интент сервиса скачивания файлов
+    public static Callable callableSetBar; //callable вызова установки боттом бара
+    public static ProgressDialog progressDialog; //диалог прогресса скачивания файлов
+    public static ArrayList<Pair<String, String>> links = new ArrayList<>(); //ссылки для скачивания необходимых файлов
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String path = this.getObbDir().getPath() + "/";
-        ArrayList<String> links = new ArrayList<>();
-        
-        ResourcesManager resourcesManager = ResourcesManager.getInstance(getApplicationContext());
-        if (resourcesManager.photosZip == null) {
-            links.add("https://dl.dropboxusercontent.com/s/7f0ftnfup1bmtjn/photos.zip?dl=0");
-            links.add(path + "photos.zip");
-            ResourcesManager.delete();
-        }
-        if (resourcesManager.postersZip == null) {
-            links.add("https://dl.dropboxusercontent.com/s/92vwcr52oqdtrrj/posters.zip?dl=0");
-            links.add(path + "posters.zip");
-            ResourcesManager.delete();
-        }
-        if (DatabaseManager.getInstance(this) == null) {
-            links.add("https://dl.dropboxusercontent.com/s/8zf11wdboxqb55y/imdb.db?dl=0");
-            links.add(path + "imdb.db");
-            DatabaseManager.delete();
-        }
-
-        if (links.size() > 0) {
-            intent = new Intent(this, DownloadService.class);
-            intent.putStringArrayListExtra("links", links);
-
-            progressDialog = new ProgressDialog(MainActivity.this);
-            progressDialog.setTitle("Downloading files");
-            progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-            progressDialog.setCanceledOnTouchOutside(false);
-            progressDialog.setButton(ProgressDialog.BUTTON_NEUTRAL,
-                    "Close",
-                    new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            stopService(intent);
-                        }
-                    });
-            progressDialog.show();
-
-            callable = new Callable() {
-                @Override
-                public Object call() throws Exception {
-                    setBottomBar();
-                    return null;
-                }
-            };
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                startForegroundService(intent);
-            else startService(intent);
-        } else {
-            setBottomBar();
-        }
+        //производится проверка наличия файлов
+        checkFiles(new Runnable() {
+            @Override
+            public void run() {
+                if (links.size() > 0) downloadFiles();
+                else setBottomBar();
+            }
+        });
     }
 
+    //метод проверки наличия файлов
+    public void checkFiles(final Runnable runnable) {
+        final String path = this.getObbDir().getPath() + "/";
+
+        (new Thread() {
+            @Override
+            public void run() {
+                //проверяем файлы
+                ResourcesManager resourcesManager = ResourcesManager.getInstance(getApplicationContext());
+                if (resourcesManager.photosZip == null)
+                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/7f0ftnfup1bmtjn/photos.zip?dl=0", path + "photos.zip"));
+
+                if (resourcesManager.postersZip == null)
+                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/92vwcr52oqdtrrj/posters.zip?dl=0", path + "posters.zip"));
+
+                if (DatabaseManager.getInstance(getApplicationContext()) == null)
+                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/8zf11wdboxqb55y/imdb.db?dl=0", path + "imdb.db"));
+
+                runOnUiThread(runnable);
+                super.run();
+            }
+        }).start();
+    }
+
+    //метод запуска сервиса скачивание файлов по ссылкам
+    public void downloadFiles() {
+        ResourcesManager.delete();
+        DatabaseManager.delete();
+
+        intent = new Intent(this, DownloadService.class);
+        progressDialog = new ProgressDialog(MainActivity.this);
+        progressDialog.setTitle(R.string.downloading_files);
+        progressDialog.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
+        progressDialog.setCanceledOnTouchOutside(false);
+        progressDialog.setButton(ProgressDialog.BUTTON_NEUTRAL, getString(R.string.close),
+                new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        stopService(intent);
+                    }
+                });
+        progressDialog.show();
+
+        callableSetBar = new Callable() {
+            @Override
+            public Object call() {
+                setBottomBar();
+                return null;
+            }
+        };
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            startForegroundService(intent);
+        else startService(intent);
+    }
+
+    //метод установки боттом бара (запускается главный фрагмент)
     public void setBottomBar() {
-        fm = getSupportFragmentManager(); // получаем менджер фрагментов
+        fm = getSupportFragmentManager();
         FragmentHelper.init(fm, this);
 
         final Fragment mainFragment = new MainFragment(); //главный фрагмент
@@ -102,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                //   setScrollViewToLastPosition();
                 fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
                 switch (item.getItemId()) {
                     case R.id.nav_movies:
@@ -140,6 +154,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        //если пользователь закрыл приложение, сервис останавливается
         if (intent != null) stopService(intent);
         super.onDestroy();
     }

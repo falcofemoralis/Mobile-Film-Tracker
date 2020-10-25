@@ -23,6 +23,7 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.ViewHolder> {
     private final LayoutInflater inflater;
     private final ArrayList<Film> films;
     private final Context context;
+    private final double POSTER_SCALE_FACTOR = 0.35; //размер постеров у фильмов
 
     public FilmAdapter(Context context, ArrayList<Film> films) {
         this.context = context;
@@ -43,8 +44,8 @@ public class FilmAdapter extends RecyclerView.Adapter<FilmAdapter.ViewHolder> {
 
         //ставим постер
         BitmapDrawable poster = film.getPoster(context);
-        holder.posterView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), 2.3, context)),
-                (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), 2.3, context))));
+        holder.posterView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), POSTER_SCALE_FACTOR, context)),
+                (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), POSTER_SCALE_FACTOR, context))));
         holder.posterView.setImageDrawable(poster);
 
         //устанавливаем название и рейтинг фильма

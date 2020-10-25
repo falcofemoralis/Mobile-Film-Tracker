@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Offline Film Tracker</string>
+    <string name="downloading_files">Downloading files</string>
+    <string name="close">Close</string>
 </resources>
