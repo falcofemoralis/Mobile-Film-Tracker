@@ -4,15 +4,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.util.Log;
-import android.util.Pair;
 
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
-import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -22,6 +18,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     private final static String DATABASE_NAME = "imdb.db";
     private static DatabaseManager instance;
     public SQLiteDatabase database;
+    private HashMap<String, String> genresMap = new HashMap<>();
 
     public DatabaseManager(Context context, String path) {
         super(context, path, null, DATABASE_VERSION);
@@ -70,7 +67,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     //получаем фильмов по жанру и году с ограничением
     public Film[] getFilmsByGenre(String genre, int premiered, int limit) {
-        String genreParam = "%" + genre + "%";
+        String genreParam = "%" + getKey(genresMap, genre) + "%";
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like ? AND titles.premiered > ? LIMIT ?", new String[]{genreParam, String.valueOf(premiered), String.valueOf(limit)});
@@ -85,7 +82,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     //получение фильмов по жанру
     public Cursor getFilmsByGenre(String genre) {
-        String genreParam = "%" + genre + "%";
+        String genreParam = "%" + getKey(genresMap, genre) + "%";
         Cursor cursor = database.rawQuery("SELECT * " +
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.genres like ? " +
@@ -146,6 +143,22 @@ public class DatabaseManager extends SQLiteOpenHelper {
 
     //конвертирование курсора в объект фильма
     public Film getFilmData(Cursor cursor) {
+        //т.к в жанрах мы получаем массив id жанров, нужно получить строковое имя жанра
+        if (genresMap.size() == 0) getGenres();
+
+        String[] genres = cursor.getString(cursor.getColumnIndex("genres")).split(",");
+        String newGenres = "";
+        boolean isFirst = true;
+
+        for (String genre : genres) {
+            if (!isFirst)
+                newGenres += ",";
+            isFirst = false;
+
+            newGenres += genresMap.get(genre);
+        }
+
+        //создаем объект фильма
         return new Film(cursor.getString(cursor.getColumnIndex("title_id")),
                 cursor.getString(cursor.getColumnIndex("primary_title")),
                 cursor.getString(cursor.getColumnIndex("rating")),
@@ -153,7 +166,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 cursor.getString(cursor.getColumnIndex("runtime_minutes")),
                 cursor.getString(cursor.getColumnIndex("premiered")),
                 cursor.getString(cursor.getColumnIndex("is_adult")),
-                cursor.getString(cursor.getColumnIndex("genres")),
+                newGenres,
                 cursor.getString(cursor.getColumnIndex("plot")));
     }
 
@@ -185,5 +198,27 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
                 "WHERE titles.primary_title like ?", new String[]{titleParam});
         return cursor;
+    }
+
+    public HashMap<String, String> getGenres() {
+        Cursor genresCursor;
+        genresCursor = database.rawQuery("SELECT genres.genre, genres.genre_id " +
+                "FROM genres", null);
+
+        while (genresCursor.moveToNext())
+            genresMap.put(genresCursor.getString(1), genresCursor.getString(0));
+
+        genresCursor.close();
+        return genresMap;
+    }
+
+    //метод получаем ключа из хешмапы
+    private  <K, V> K getKey(Map<K, V> map, V value) {
+        for (Map.Entry<K, V> entry : map.entrySet()) {
+            if (entry.getValue().equals(value)) {
+                return entry.getKey();
+            }
+        }
+        return null;
     }
 }
