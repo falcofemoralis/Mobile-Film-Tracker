@@ -146,7 +146,7 @@ public class MainFragment extends Fragment {
         moreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(CategoryFragment.newInstance(genre, true));
+                FragmentHelper.openFragment(FilmsListFragment.newInstance(genre, true));
             }
         });
         ViewGroup.LayoutParams layoutParams = moreBtn.getLayoutParams();

@@ -24,7 +24,7 @@ import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
 
-public class CategoryFragment extends Fragment {
+public class FilmsListFragment extends Fragment {
     private static final String ARG_SELECTPARAM = "param1", ARG_ISGENRE = "param2"; //параметр жанра и параметр указавыющий на принадлежность к жанру
     private String selectParam; //строка по которой будут выбраны фильмы из базы
     private boolean isGenre; //логическая переменная принадлежности строки выборки к жанру
@@ -36,8 +36,8 @@ public class CategoryFragment extends Fragment {
     private FilmAdapter adapter; //адаптер фильмов в RecyclerView
     private View view; //вью фрагмента
 
-    public static CategoryFragment newInstance(String selectParam, boolean isGenre) {
-        CategoryFragment fragment = new CategoryFragment();
+    public static FilmsListFragment newInstance(String selectParam, boolean isGenre) {
+        FilmsListFragment fragment = new FilmsListFragment();
         Bundle args = new Bundle();
         args.putString(ARG_SELECTPARAM, selectParam);
         args.putBoolean(ARG_ISGENRE, isGenre);
@@ -58,12 +58,12 @@ public class CategoryFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         if (view == null) {
-            view = inflater.inflate(R.layout.fragment_category, container, false);
-            progressBar = view.findViewById(R.id.fragment_category_pb_loading);
+            view = inflater.inflate(R.layout.fragment_filmslist, container, false);
+            progressBar = view.findViewById(R.id.fragment_filmslist_pb_loading);
             scrollView = getActivity().findViewById(R.id.nestedScrollView);
 
             //устанаваливаем заголовок фрагмента (если параметр выборки жанр)
-            TextView genreText = view.findViewById(R.id.fragment_category_films_tv_header);
+            TextView genreText = view.findViewById(R.id.fragment_filmslist_films_tv_header);
             if (isGenre) genreText.setText(getString(R.string.films, selectParam));
             else genreText.setVisibility(View.GONE);
 
@@ -81,7 +81,7 @@ public class CategoryFragment extends Fragment {
 
     //метод инциализация списка фильмов
     public void setFilms() {
-        final RecyclerView recyclerView = view.findViewById(R.id.fragment_category_films_rv_films);
+        final RecyclerView recyclerView = view.findViewById(R.id.fragment_filmslist_films_rv_films);
 
         //получаем фильмы
         addFilms(new Runnable() {

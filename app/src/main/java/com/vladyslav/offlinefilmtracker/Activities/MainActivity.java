@@ -15,6 +15,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.vladyslav.offlinefilmtracker.Fragments.CategoriesFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.MainFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.SearchFragment;
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
@@ -113,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
     public void setBottomBar() {
         final Fragment mainFragment = new MainFragment(); //главный фрагмент
         final Fragment searchFragment = new SearchFragment(); //фрагмент поиска
+        final Fragment categoriesFragment = new CategoriesFragment(); //фрагмент поиска
 
         //устанавливаем бар навигации
         BottomNavigationView bottomNavigationView = findViewById(R.id.activity_main_nv_bottomBar);
@@ -125,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_search:
                         FragmentHelper.changeFragment(searchFragment);
+                        break;
+                    case R.id.nav_categories:
+                        FragmentHelper.changeFragment(categoriesFragment);
                         break;
                 }
                 return true;
@@ -157,6 +162,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         //если пользователь закрыл приложение, сервис останавливается
         if (intent != null) stopService(intent);
+        finishAndRemoveTask();
         super.onDestroy();
     }
 }

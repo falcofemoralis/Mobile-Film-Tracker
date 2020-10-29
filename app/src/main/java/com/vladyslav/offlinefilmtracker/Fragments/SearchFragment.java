@@ -95,7 +95,7 @@ public class SearchFragment extends Fragment {
                                         hintsLayout.setVisibility(View.GONE);
 
                                         //меняем фрагмент на фрагмент категории
-                                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, CategoryFragment.newInstance(text, false)).commit();
+                                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, FilmsListFragment.newInstance(text, false)).commit();
                                     }
 
                                 }

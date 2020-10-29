@@ -5,21 +5,21 @@
     android:layout_height="wrap_content"
     android:layout_margin="15dp"
     android:orientation="vertical"
-    tools:context=".Fragments.CategoryFragment">
+    tools:context=".Fragments.FilmsListFragment">
 
     <TextView
-        android:id="@+id/fragment_category_films_tv_header"
+        android:id="@+id/fragment_filmslist_films_tv_header"
         style="@style/Header" />
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/fragment_category_films_rv_films"
+        android:id="@+id/fragment_filmslist_films_rv_films"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:orientation="vertical" />
 
     <ProgressBar
-        android:id="@+id/fragment_category_pb_loading"
+        android:id="@+id/fragment_filmslist_pb_loading"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

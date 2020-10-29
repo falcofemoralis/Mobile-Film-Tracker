@@ -11,5 +11,4 @@
     android:text="Test"
     android:textColor="#FFFFFF"
     android:textSize="12sp">
-
 </TextView>

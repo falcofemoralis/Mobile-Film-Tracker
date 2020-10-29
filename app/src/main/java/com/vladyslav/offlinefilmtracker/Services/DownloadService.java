@@ -28,6 +28,8 @@ import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.links;
 import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.progressDialog;
 
 public class DownloadService extends Service {
+    private boolean running = true;
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -50,13 +52,13 @@ public class DownloadService extends Service {
         String channelName = "Download Service";
 
         //создаем канал для уведомлений
-        NotificationChannel chan = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
-        chan.setLightColor(Color.BLUE);
-        chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
+        NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, channelName, NotificationManager.IMPORTANCE_NONE);
+        channel.setLightColor(Color.BLUE);
+        channel.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
 
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         assert manager != null;
-        manager.createNotificationChannel(chan);
+        manager.createNotificationChannel(channel);
 
         //создаем уведомление (то что в верхней части экрана)
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
@@ -98,7 +100,7 @@ public class DownloadService extends Service {
                         });
 
                         //скачиваем файл
-                        while ((count = inputStream.read(data)) != -1) {
+                        while ((count = inputStream.read(data)) != -1 && running) {
                             total += count;
                             final long finalTotal = total;
                             mHandler.post(new Runnable() {
@@ -113,12 +115,16 @@ public class DownloadService extends Service {
                         outputStream.close();
                     }
 
-                    try {
-                        stopSelf();
-                        callableStart.call();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    stopSelf();
+                    mHandler.post(new Runnable() {
+                        public void run() {
+                            try {
+                                callableStart.call();
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    });
                 } catch (Exception e) {
                     stopSelf();
                     mHandler.post(new Runnable() {
@@ -133,8 +139,10 @@ public class DownloadService extends Service {
         return START_STICKY;
     }
 
+
     @Override
     public void onDestroy() {
+        running = false;
         super.onDestroy();
     }
 }
