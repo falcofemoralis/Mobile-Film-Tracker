@@ -4,7 +4,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,7 +22,8 @@ import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainFragment extends Fragment {
     private final double POSTER_SCALE_FACTOR = 0.30; //размер постеров у фильмов
@@ -33,15 +33,15 @@ public class MainFragment extends Fragment {
     private DatabaseManager databaseManager; //менджер базы данных
     private int moreBtnHeight; //размер кнопки More
 
-    //лист пар из ключа жанра (в базе) и id строковой константы
-    public final ArrayList<Pair<String, Integer>> genres = new ArrayList<Pair<String, Integer>>() {
+    //хешмап из ключа жанра (в базе) и id строковой константы, где -1 = Popular
+    public final HashMap<String, String> genres = new HashMap<String, String>() {
         {
-            add(new Pair<>("Popular", R.string.genre_popular));
-            add(new Pair<>("Action", R.string.genre_action));
-            add(new Pair<>("Sci-Fi", R.string.genre_sciFi));
-            add(new Pair<>("Fantasy", R.string.genre_fantasy));
-            add(new Pair<>("Comedy", R.string.genre_comedy));
-            add(new Pair<>("Animation", R.string.genre_animation));
+            put("-1", "popular");
+            put("1", "action");
+            put("9", "scifi");
+            put("16", "fantasy");
+            put("21", "comedy");
+            put("18", "animation");
         }
     };
 
@@ -64,20 +64,20 @@ public class MainFragment extends Fragment {
             public void run() {
                 databaseManager = DatabaseManager.getInstance(view.getContext());
                 //получаем фильмы по жанру
-                for (final Pair<String, Integer> genre : genres) {
-                    final String genreString = genre.first;
+                for (final Map.Entry<String, String> genreEntry : genres.entrySet()) {
+                    final String genreId = genreEntry.getKey();
 
                     final Film[] films;
-                    if (genreString.equals("Popular")) {
+                    if (genreId.equals("-1")) {
                         films = databaseManager.getPopularFilms(FILMS_IN_ROW);
                     } else {
-                        films = databaseManager.getFilmsByGenre(genreString, 2015, FILMS_IN_ROW);
+                        films = databaseManager.getFilmsByGenre(genreId, 2015, FILMS_IN_ROW);
                     }
 
                     //устанавливаем полученные фильмы в строки
                     mHandler.post(new Runnable() {
                         public void run() {
-                            createFilmRow(films, genreString, genre.second);
+                            createFilmRow(films, genreEntry);
 
                         }
                     });
@@ -93,15 +93,15 @@ public class MainFragment extends Fragment {
     }
 
     //создаем ряд с фильмами
-    public void createFilmRow(Film[] films, String genre, int genreStringId) {
+    public void createFilmRow(Film[] films, Map.Entry<String, String> genreEntry) {
         LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //строка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, getString(genreStringId))); //устанавливаем заголовок строки
+        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, ResourcesManager.getGenreStringById(genreEntry.getValue(),getContext()))); //устанавливаем заголовок строки
 
         LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         for (int i = 0; i < FILMS_IN_ROW; i++)
             addFilm(films[i], linearLayout);
 
-        if (!genre.equals("Popular")) addMoreBtn(linearLayout, genre);
+        if (!genreEntry.getKey().equals("-1")) addMoreBtn(linearLayout, genreEntry);
         baseLayout.addView(filmsLayout); //добавляем в корень
     }
 
@@ -140,13 +140,13 @@ public class MainFragment extends Fragment {
     }
 
     //добавляем кнопку открытия всех фильмов по категории
-    public void addMoreBtn(LinearLayout baseLayout, final String genre) {
+    public void addMoreBtn(LinearLayout baseLayout, final Map.Entry<String, String> genreEntry) {
         LinearLayout moreBtnLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
         ImageView moreBtn = (ImageView) moreBtnLayout.getChildAt(0);
         moreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(FilmsListFragment.newInstance(genre, true));
+                FragmentHelper.openFragment(FilmsListFragment.newInstance(genreEntry));
             }
         });
         ViewGroup.LayoutParams layoutParams = moreBtn.getLayoutParams();

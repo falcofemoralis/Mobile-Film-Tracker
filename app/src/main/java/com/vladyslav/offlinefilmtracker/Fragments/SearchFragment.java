@@ -42,7 +42,6 @@ public class SearchFragment extends Fragment {
             editText = view.findViewById(R.id.fragment_search_act_suggest);
             imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
             hintsLayout = view.findViewById(R.id.fragment_search_ll_hint);
-
             initSearch();
         }
         return view;
@@ -95,7 +94,7 @@ public class SearchFragment extends Fragment {
                                         hintsLayout.setVisibility(View.GONE);
 
                                         //меняем фрагмент на фрагмент категории
-                                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, FilmsListFragment.newInstance(text, false)).commit();
+                                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, FilmsListFragment.newInstance(text)).commit();
                                     }
 
                                 }

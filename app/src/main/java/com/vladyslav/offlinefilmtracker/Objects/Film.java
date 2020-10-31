@@ -13,7 +13,7 @@ public class Film implements Serializable {
     private boolean isAdult;
     private String[] genres;
 
-    public Film(String film_id, String title, String rating, String votes, String runtime_minutes, String premiered, String isAdult, String genres, String plot) {
+    public Film(String film_id, String title, String rating, String votes, String runtime_minutes, String premiered, String isAdult, String[] genres, String plot) {
         this.film_id = film_id;
         this.title = title;
         this.rating = rating;
@@ -21,7 +21,7 @@ public class Film implements Serializable {
         this.runtime_minutes = runtime_minutes;
         this.premiered = premiered;
         this.isAdult = Boolean.parseBoolean(isAdult);
-        this.genres = genres.split(","); //т.к данны приходят в формате String_1, String_2, то нужно разделить;
+        this.genres = genres;
         this.plot = plot;
     }
 

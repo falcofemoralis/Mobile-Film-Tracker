@@ -6,12 +6,17 @@
     android:orientation="vertical"
     tools:context=".Fragments.CategoriesFragment">
 
-    <LinearLayout
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/categories_hint"
+        style="@style/Header"
+        />
+    <GridLayout
         android:id="@+id/fragment_categories_ll_main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-    </LinearLayout>
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:columnCount="3" />
 
 </LinearLayout>

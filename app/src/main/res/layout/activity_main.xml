@@ -38,12 +38,12 @@
                 android:layout_height="100dp"
                 android:layout_gravity="center"
                 android:layout_margin="15dp"
-                android:src="@drawable/csn_logo"
+                android:src="@mipmap/csn_logo"
                 app:layout_constraintBottom_toTopOf="@+id/main_fragment_container"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/csn_logo" />
+                app:srcCompat="@mipmap/csn_logo" />
 
             <androidx.fragment.app.FragmentContainerView
                 android:id="@+id/main_fragment_container"

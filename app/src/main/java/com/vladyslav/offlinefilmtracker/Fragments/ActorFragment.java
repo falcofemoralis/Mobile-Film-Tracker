@@ -84,7 +84,6 @@ public class ActorFragment extends Fragment {
         else diedTV.setVisibility(View.GONE);
     }
 
-    //TODO оптимизировать
     //метод установки фильмов
     public void setFilms() {
         final Handler mHandler = new Handler(Looper.getMainLooper());
@@ -141,8 +140,7 @@ public class ActorFragment extends Fragment {
                                 textView.setTextAppearance(R.style.Header);
 
                                 //устанавливаем текст заголовка
-                                String role = getKey(rolesMap, i);
-                                textView.setText(role.substring(0, 1).toUpperCase() + role.substring(1));
+                                textView.setText(ResourcesManager.getRoleById(getKey(rolesMap, i),getContext()));
                                 baseLayout.addView(textView);
 
                                 //создаем RecyclerView (список фильмов)

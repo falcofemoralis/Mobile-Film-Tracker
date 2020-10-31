@@ -18,15 +18,17 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
+import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.Objects.FilmAdapter;
 import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
+import java.util.Map;
 
 public class FilmsListFragment extends Fragment {
     private static final String ARG_SELECTPARAM = "param1", ARG_ISGENRE = "param2"; //параметр жанра и параметр указавыющий на принадлежность к жанру
-    private String selectParam; //строка по которой будут выбраны фильмы из базы
+    private String[] selectParam; //строка по которой будут выбраны фильмы из базы
     private boolean isGenre; //логическая переменная принадлежности строки выборки к жанру
     private NestedScrollView scrollView; //вью прокручивателя
     private final int FILMS_PER_SCROLL = 18; //кол-во фильмов за пролистывание
@@ -36,11 +38,20 @@ public class FilmsListFragment extends Fragment {
     private FilmAdapter adapter; //адаптер фильмов в RecyclerView
     private View view; //вью фрагмента
 
-    public static FilmsListFragment newInstance(String selectParam, boolean isGenre) {
+    public static FilmsListFragment newInstance(Map.Entry<String, String> selectParam) {
         FilmsListFragment fragment = new FilmsListFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_SELECTPARAM, selectParam);
-        args.putBoolean(ARG_ISGENRE, isGenre);
+        args.putStringArray(ARG_SELECTPARAM, new String[]{selectParam.getKey(), selectParam.getValue()});
+        args.putBoolean(ARG_ISGENRE, true);
+        fragment.setArguments(args);
+        return fragment;
+    }
+
+    public static FilmsListFragment newInstance(String selectParam) {
+        FilmsListFragment fragment = new FilmsListFragment();
+        Bundle args = new Bundle();
+        args.putStringArray(ARG_SELECTPARAM, new String[]{selectParam});
+        args.putBoolean(ARG_ISGENRE, false);
         fragment.setArguments(args);
         return fragment;
     }
@@ -49,7 +60,7 @@ public class FilmsListFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            selectParam = getArguments().getString(ARG_SELECTPARAM);
+            selectParam = getArguments().getStringArray(ARG_SELECTPARAM);
             isGenre = getArguments().getBoolean(ARG_ISGENRE);
         }
     }
@@ -64,7 +75,7 @@ public class FilmsListFragment extends Fragment {
 
             //устанаваливаем заголовок фрагмента (если параметр выборки жанр)
             TextView genreText = view.findViewById(R.id.fragment_filmslist_films_tv_header);
-            if (isGenre) genreText.setText(getString(R.string.films, selectParam));
+            if (isGenre) genreText.setText(getString(R.string.films, ResourcesManager.getGenreStringById(selectParam[1], getContext())));
             else genreText.setVisibility(View.GONE);
 
             setFilms();
@@ -127,9 +138,9 @@ public class FilmsListFragment extends Fragment {
         //проверяем были ли загруженны фильмы из базы данных
         if (filmsCursor == null) {
             if (isGenre)
-                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(selectParam);
+                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(selectParam[0]);
             else
-                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByTitle(selectParam);
+                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByTitle(selectParam[0]);
         }
 
         //включаем бар загрузки

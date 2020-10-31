@@ -4,9 +4,11 @@ import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.google.android.vending.expansion.zipfile.ZipResourceFile;
+import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 
 //SINGLETON
 public class ResourcesManager {
@@ -70,5 +72,32 @@ public class ResourcesManager {
         }
 
         return (BitmapDrawable) BitmapDrawable.createFromStream(fileStream, null);
+    }
+
+    public static String getGenreStringById(String name, Context context) {
+        try {
+            Field idField = R.string.class.getDeclaredField("genre_" + normalizeGenreString(name));
+            return context.getString(idField.getInt(idField));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public static String normalizeGenreString(String name) {
+        String genreString = name.toLowerCase();
+        if (genreString.equals("sci-fi"))
+            genreString = genreString.replace("-", ""); //удаляем "-" из жанра
+        return genreString;
+    }
+
+    public static String getRoleById(String name, Context context) {
+        try {
+            Field idField = R.string.class.getDeclaredField("role_" + name);
+            return context.getString(idField.getInt(idField));
+        } catch (NoSuchFieldException | IllegalAccessException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
