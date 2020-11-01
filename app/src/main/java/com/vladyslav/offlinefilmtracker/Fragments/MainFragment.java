@@ -73,8 +73,6 @@ public class MainFragment extends Fragment {
                             @Override
                             public void run() {
                                 createFilmRow(films, genreEntry);
-                                getActivity().findViewById(R.id.progress_bar).setVisibility(View.GONE);
-                                getActivity().findViewById(R.id.main_fragment_container).setVisibility(View.VISIBLE);
                             }
                         });
                     }
@@ -95,6 +93,7 @@ public class MainFragment extends Fragment {
                 thread.start();
                 thread.join();
             }
+            getActivity().findViewById(R.id.progress_bar).setVisibility(View.GONE);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

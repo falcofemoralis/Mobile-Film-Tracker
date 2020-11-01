@@ -115,18 +115,17 @@ public class DownloadService extends Service {
                         outputStream.close();
                     }
 
-                    stopSelf();
-
                     msg = MainActivity.hMain.obtainMessage();
                     msg.what = MainActivity.SETBOTTOMBAR;
                     MainActivity.hMain.sendMessage(msg);
-                } catch (Exception e) {
                     stopSelf();
-
+                } catch (Exception e) {
                     msg = MainActivity.hMain.obtainMessage();
                     msg.what = MainActivity.FAILED;
                     MainActivity.hMain.sendMessage(msg);
                     e.printStackTrace();
+
+                    stopSelf();
                 }
             }
         }).start();

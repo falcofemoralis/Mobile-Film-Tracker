@@ -29,7 +29,6 @@ public class ResourcesManager {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
     public static ResourcesManager getInstance(Context context) {

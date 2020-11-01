@@ -184,6 +184,7 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case SETBOTTOMBAR:
                         activity.progressDialog.hide();
+                        ResourcesManager.getInstance(activity.getApplicationContext());
                         activity.setBottomBar();
                         break;
                     case FAILED:

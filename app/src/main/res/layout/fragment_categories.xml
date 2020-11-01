@@ -16,7 +16,6 @@
         android:id="@+id/fragment_categories_ll_main"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
+        android:layout_gravity="center"
         android:columnCount="3" />
-
 </LinearLayout>
