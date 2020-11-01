@@ -2,8 +2,6 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,7 +20,8 @@ import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MainFragment extends Fragment {
@@ -34,7 +33,7 @@ public class MainFragment extends Fragment {
     private int moreBtnHeight; //размер кнопки More
 
     //хешмап из ключа жанра (в базе) и id строковой константы, где -1 = Popular
-    public final HashMap<String, String> genres = new HashMap<String, String>() {
+    public final LinkedHashMap<String, String> genres = new LinkedHashMap<String, String>() {
         {
             put("-1", "popular");
             put("1", "action");
@@ -51,6 +50,7 @@ public class MainFragment extends Fragment {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_main, container, false);
             baseLayout = view.findViewById(R.id.fragment_main_ll_layout);
+            databaseManager = DatabaseManager.getInstance(getContext());
 
             getFilmsFromDatabase();
         }
@@ -59,72 +59,100 @@ public class MainFragment extends Fragment {
 
     //загружаем фильмы из базы по жанрам
     public void getFilmsFromDatabase() {
-        final Handler mHandler = new Handler(Looper.getMainLooper());
-        (new Thread() {
-            public void run() {
-                databaseManager = DatabaseManager.getInstance(view.getContext());
-                //получаем фильмы по жанру
-                for (final Map.Entry<String, String> genreEntry : genres.entrySet()) {
-                    final String genreId = genreEntry.getKey();
+        ArrayList<Thread> threads = new ArrayList<>();
+        for (final Map.Entry<String, String> genreEntry : genres.entrySet()) {
+            final String genreId = genreEntry.getKey(); //id жанра в базе
+            final ArrayList<Film> films = new ArrayList<>(); //список фильмов, в него будет загружены фильмы из базы
 
-                    final Film[] films;
-                    if (genreId.equals("-1")) {
-                        films = databaseManager.getPopularFilms(FILMS_IN_ROW);
-                    } else {
-                        films = databaseManager.getFilmsByGenre(genreId, 2015, FILMS_IN_ROW);
-                    }
-
-                    //устанавливаем полученные фильмы в строки
-                    mHandler.post(new Runnable() {
-                        public void run() {
-                            createFilmRow(films, genreEntry);
-
-                        }
-                    });
-                }
-                mHandler.post(new Runnable() {
+            //получаем в фильмы из базы и устанавливаем ряд из них
+            try {
+                Runnable runnable = new Runnable() {
+                    @Override
                     public void run() {
-                        getActivity().findViewById(R.id.progress_bar).setVisibility(View.GONE);
-                        getActivity().findViewById(R.id.main_fragment_container).setVisibility(View.VISIBLE);
+                        getActivity().runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                createFilmRow(films, genreEntry);
+                                getActivity().findViewById(R.id.progress_bar).setVisibility(View.GONE);
+                                getActivity().findViewById(R.id.main_fragment_container).setVisibility(View.VISIBLE);
+                            }
+                        });
                     }
-                });
+                };
+
+                if (genreId.equals("-1"))
+                    threads.add(databaseManager.getPopularFilms(FILMS_IN_ROW, films, runnable));
+                else
+                    threads.add(databaseManager.getFilmsByGenre(genreId, 2015, FILMS_IN_ROW, films, runnable));
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        }).start();
+        }
+
+        try {
+            for (int i = 0; i < threads.size(); i++) {
+                Thread thread = threads.get(i);
+                thread.start();
+                thread.join();
+            }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     //создаем ряд с фильмами
-    public void createFilmRow(Film[] films, Map.Entry<String, String> genreEntry) {
-        LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //строка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, ResourcesManager.getGenreStringById(genreEntry.getValue(),getContext()))); //устанавливаем заголовок строки
+    public void createFilmRow(ArrayList<Film> films, final Map.Entry<String, String> genreEntry) {
+        final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //строка фильмов
+        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, ResourcesManager.getGenreStringById(genreEntry.getValue(), getContext()))); //устанавливаем заголовок строки
 
-        LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
+        final LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                if (!genreEntry.getKey().equals("-1")) addMoreBtn(linearLayout, genreEntry);
+                baseLayout.addView(filmsLayout); //добавляем в корень
+            }
+        };
         for (int i = 0; i < FILMS_IN_ROW; i++)
-            addFilm(films[i], linearLayout);
-
-        if (!genreEntry.getKey().equals("-1")) addMoreBtn(linearLayout, genreEntry);
-        baseLayout.addView(filmsLayout); //добавляем в корень
+            addFilm(films.get(i), linearLayout, i, runnable);
     }
 
     //добавление нового фильма в указанный лаяут
-    public void addFilm(final Film film, LinearLayout layout) {
+    public void addFilm(final Film film, LinearLayout layout, final int i, final Runnable runnable) {
         //создаем View для постера
         final LinearLayout filmLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film, null);
 
         //ставим постер
-        BitmapDrawable poster = film.getPoster(getContext());
-        ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
+        final BitmapDrawable[] poster = new BitmapDrawable[1];
+        film.getPoster(getContext(), poster, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //устанавливаем постер
+                        ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
 
-        int posterHeight = ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext());
-        int posterWidth = ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext());
+                        if (filmPoster != null) {
+                            int posterHeight = ResourcesManager.getDpFromPx(poster[0].getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext());
+                            int posterWidth = ResourcesManager.getDpFromPx(poster[0].getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext());
 
-        filmPoster.setLayoutParams(new LinearLayout.LayoutParams(posterWidth, posterHeight));
-        filmPoster.setImageDrawable(poster);
-        moreBtnHeight = posterHeight;
+                            filmPoster.setLayoutParams(new LinearLayout.LayoutParams(posterWidth, posterHeight));
+                            filmPoster.setImageDrawable(poster[0]);
 
-        //ставим основную информацию
-        TextView titleView = ((TextView) filmLayout.getChildAt(1));
-        titleView.setText(film.getTitle());
-        titleView.setWidth(posterWidth);
+                            moreBtnHeight = posterHeight;
+
+                            //ставим основную информацию
+                            TextView titleView = ((TextView) filmLayout.getChildAt(1));
+                            titleView.setText(film.getTitle());
+                            titleView.setWidth(posterWidth);
+
+                            if (i + 1 == FILMS_IN_ROW) runnable.run();
+                        }
+                    }
+                });
+            }
+        });
 
         ((TextView) filmLayout.getChildAt(2)).setText(film.getRating());
 

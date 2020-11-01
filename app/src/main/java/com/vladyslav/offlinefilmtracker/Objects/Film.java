@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
+import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -41,8 +42,14 @@ public class Film implements Serializable {
         return votes;
     }
 
-    public BitmapDrawable getPoster(Context context) {
-        return ResourcesManager.getInstance(context).getDrawableById(film_id, true);
+    public void getPoster(final Context context, final BitmapDrawable[] poster, final Runnable runnable) {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                poster[0] = ResourcesManager.getInstance(context).getPosterDrawableById(film_id);
+                runnable.run();
+            }
+        })).start();
     }
 
     public String getRuntime_minutes() {

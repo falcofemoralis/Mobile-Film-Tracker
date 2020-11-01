@@ -9,6 +9,7 @@ import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 //SINGLETON
@@ -40,7 +41,6 @@ public class DatabaseManager extends SQLiteOpenHelper {
         instance = null;
     }
 
-
     @Override
     public void onCreate(SQLiteDatabase db) {
     }
@@ -50,84 +50,134 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получение популярных фильмов
-    public Film[] getPopularFilms(int limit) {
-        Cursor cursor = database.rawQuery("SELECT * " +
-                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
-                "ORDER BY ratings.votes DESC LIMIT ?", new String[]{String.valueOf(limit)});
-        Film[] films = new Film[cursor.getCount()];
-        int n = 0;
-        while (cursor.moveToNext())
-            films[n++] = getFilmData(cursor);
+    public Thread getPopularFilms(final int limit, final ArrayList<Film> films, final Runnable runnable) {
+        return new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = database.rawQuery("SELECT * " +
+                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                        "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
+                        "ORDER BY ratings.votes DESC LIMIT ?", new String[]{String.valueOf(limit)});
+                while (cursor.moveToNext())
+                    films.add(getFilmData(cursor));
 
-        cursor.close();
-        return films;
+                cursor.close();
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     //получаем фильмов по жанру и году с ограничением
-    public Film[] getFilmsByGenre(String genreId, int premiered, int limit) {
-        String genreParam = "%" + genreId + "%";
-        Cursor cursor = database.rawQuery("SELECT * " +
-                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE titles.genres like ? AND titles.premiered > ? LIMIT ?", new String[]{genreParam, String.valueOf(premiered), String.valueOf(limit)});
-        Film[] films = new Film[cursor.getCount()];
-        int n = 0;
-        while (cursor.moveToNext())
-            films[n++] = getFilmData(cursor);
+    public Thread getFilmsByGenre(final String genreId, final int premiered, final int limit, final ArrayList<Film> films, final Runnable runnable) {
+        return new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String genreParam = "%" + genreId + "%";
+                Cursor cursor = database.rawQuery("SELECT * " +
+                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                        "WHERE titles.genres like ? AND titles.premiered > ? LIMIT ?", new String[]{genreParam, String.valueOf(premiered), String.valueOf(limit)});
+                while (cursor.moveToNext())
+                    films.add(getFilmData(cursor));
 
-        cursor.close();
-        return films;
+                cursor.close();
+
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     //получение фильмов по жанру
-    public Cursor getFilmsByGenre(String genreId) {
-        String genreParam = "%" + genreId + "%";
-        Cursor cursor = database.rawQuery("SELECT * " +
-                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE titles.genres like ? " +
-                "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{genreParam});
-        return cursor;
+    public void getFilmsByGenre(final String genreId, final ArrayList<Cursor> cursor, final Runnable runnable) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String genreParam = "%" + genreId + "%";
+                cursor.add(database.rawQuery("SELECT * " +
+                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                        "WHERE titles.genres like ? " +
+                        "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{genreParam}));
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    //получение возможных фильмов по названию
+    public void getFilmsByTitle(final String title, final ArrayList<Cursor> cursor, final Runnable runnable) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String titleParam = "%" + title + "%";
+                cursor.add(database.rawQuery("SELECT * " +
+                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                        "WHERE titles.primary_title like ?", new String[]{titleParam}));
+                try {
+                    runnable.run();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     //получение актеров в фильме
-    public Actor[] getActorsByTitleId(String titleId) {
-        Cursor cursor = database.rawQuery("SELECT people.person_id, people.name, people.born, people.died, crew.characters, crew.category " +
-                "FROM crew INNER JOIN people ON people.person_id = crew.person_id " +
-                "WHERE crew.title_id = ?", new String[]{titleId});
+    public void getActorsByTitleId(final String titleId, final ArrayList<Actor> actors, final Runnable runnable) {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = database.rawQuery("SELECT people.person_id, people.name, people.born, people.died, crew.characters, crew.category " +
+                        "FROM crew INNER JOIN people ON people.person_id = crew.person_id " +
+                        "WHERE crew.title_id = ?", new String[]{titleId});
 
-        Actor[] actors = new Actor[cursor.getCount()];
-        int n = 0;
-        while (cursor.moveToNext()) {
-            actors[n++] = new Actor(cursor.getString(cursor.getColumnIndex("person_id")),
-                    cursor.getString(cursor.getColumnIndex("name")),
-                    cursor.getString(cursor.getColumnIndex("born")),
-                    cursor.getString(cursor.getColumnIndex("died")),
-                    cursor.getString(cursor.getColumnIndex("characters")),
-                    cursor.getString(cursor.getColumnIndex("category")));
-        }
-        cursor.close();
-        return actors;
+                while (cursor.moveToNext()) {
+                    actors.add(new Actor(cursor.getString(cursor.getColumnIndex("person_id")),
+                            cursor.getString(cursor.getColumnIndex("name")),
+                            cursor.getString(cursor.getColumnIndex("born")),
+                            cursor.getString(cursor.getColumnIndex("died")),
+                            cursor.getString(cursor.getColumnIndex("characters")),
+                            cursor.getString(cursor.getColumnIndex("category"))));
+                }
+                cursor.close();
+                runnable.run();
+            }
+        })).start();
     }
 
     //получением фильмов актера
-    public Film[] getFilmsByPersonId(String personId) {
-        Cursor cursor = database.rawQuery("SELECT DISTINCT crew.title_id, ratings.rating " +
-                "FROM crew INNER JOIN ratings on ratings.title_id = crew.title_id " +
-                "WHERE crew.person_id = ?" +
-                "ORDER BY ratings.rating DESC", new String[]{personId});
-        Film[] films = new Film[cursor.getCount()];
-        int n = 0;
-        while (cursor.moveToNext()) {
-            Cursor cursor_films = database.rawQuery("SELECT * " +
-                    "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id WHERE titles.title_id = ?", new String[]{cursor.getString(cursor.getColumnIndex("title_id"))});
-            cursor_films.moveToFirst();
-            films[n++] = getFilmData(cursor_films);
-        }
-        cursor.close();
-        return films;
+    public void getFilmsByPersonId(final String personId, final ArrayList<Film> films, final Runnable runnable) {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = database.rawQuery("SELECT DISTINCT crew.title_id, ratings.rating " +
+                        "FROM crew INNER JOIN ratings on ratings.title_id = crew.title_id " +
+                        "WHERE crew.person_id = ?" +
+                        "ORDER BY ratings.rating DESC", new String[]{personId});
+                while (cursor.moveToNext()) {
+                    Cursor cursor_films = database.rawQuery("SELECT * " +
+                            "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id WHERE titles.title_id = ?", new String[]{cursor.getString(cursor.getColumnIndex("title_id"))});
+                    cursor_films.moveToFirst();
+                    films.add(getFilmData(cursor_films));
+                }
+                cursor.close();
+
+                runnable.run();
+            }
+        })).start();
     }
 
     //получение роли в фильме по актеру и фильму
+    //находится в отдельном потоке
     public String[] getRoleByPersonAndTitleId(String personId, String titleId) {
         Cursor cursor = database.rawQuery(" SELECT crew.category FROM crew WHERE crew.person_id = ? and crew.title_id = ?;", new String[]{personId, titleId});
 
@@ -137,7 +187,50 @@ public class DatabaseManager extends SQLiteOpenHelper {
             roles[n++] = cursor.getString(cursor.getColumnIndex("category"));
         }
 
+        cursor.close();
         return roles;
+    }
+
+    //получение фильмов всех фильмов в кач-ве
+    public void getAllFilms(final HashMap<String, String> films, final Runnable runnable) {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = database.rawQuery("SELECT titles.primary_title, titles.title_id " +
+                        "FROM titles", null);
+                while (cursor.moveToNext())
+                    films.put(cursor.getString(cursor.getColumnIndex("primary_title")), cursor.getString(cursor.getColumnIndex("title_id")));
+
+                cursor.close();
+                runnable.run();
+            }
+        })).start();
+    }
+
+    //получение фильма по id
+    public void getFilmByTitleId(final String titleId, final Film[] film, final Runnable runnable) {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor cursor = database.rawQuery("SELECT * " +
+                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
+                        "WHERE titles.title_id = ?", new String[]{titleId});
+                cursor.moveToFirst();
+                film[0] = getFilmData(cursor);
+
+                runnable.run();
+            }
+        })).start();
+    }
+
+    public String getGenreById(String id) {
+        if (genresMap.size() == 0) loadGenres();
+        return genresMap.get(id);
+    }
+
+    public HashMap<String, String> getGenresMap() {
+        if (genresMap.size() == 0) loadGenres();
+        return genresMap;
     }
 
     //конвертирование курсора в объект фильма
@@ -154,50 +247,26 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 cursor.getString(cursor.getColumnIndex("plot")));
     }
 
-    //получение фильмов по жанру
-    public HashMap<String, String> getAllFilms() {
-        Cursor cursor = database.rawQuery("SELECT titles.primary_title, titles.title_id " +
-                "FROM titles", null);
-        HashMap<String, String> films = new HashMap<>();
-        while (cursor.moveToNext())
-            films.put(cursor.getString(cursor.getColumnIndex("primary_title")), cursor.getString(cursor.getColumnIndex("title_id")));
+    public void loadGenres() {
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Cursor genresCursor;
+                genresCursor = database.rawQuery("SELECT genres.genre, genres.genre_id " +
+                        "FROM genres", null);
 
-        cursor.close();
-        return films;
-    }
+                while (genresCursor.moveToNext())
+                    genresMap.put(genresCursor.getString(1), genresCursor.getString(0));
 
-    //получение фильма по id
-    public Film getFilmByTitleId(String titleId) {
-        Cursor cursor = database.rawQuery("SELECT * " +
-                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE titles.title_id = ?", new String[]{titleId});
-        cursor.moveToFirst();
-        return getFilmData(cursor);
-    }
+                genresCursor.close();
+            }
+        });
+        thread.start();
 
-    //получение возможных фильмов по названию
-    public Cursor getFilmsByTitle(String title) {
-        String titleParam = "%" + title + "%";
-        Cursor cursor = database.rawQuery("SELECT * " +
-                "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                "WHERE titles.primary_title like ?", new String[]{titleParam});
-        return cursor;
-    }
-
-    public String getGenreById(String id) {
-        if (genresMap.size() == 0) getGenres();
-        return genresMap.get(id);
-    }
-
-    public HashMap<String, String> getGenres() {
-        Cursor genresCursor;
-        genresCursor = database.rawQuery("SELECT genres.genre, genres.genre_id " +
-                "FROM genres", null);
-
-        while (genresCursor.moveToNext())
-            genresMap.put(genresCursor.getString(1), genresCursor.getString(0));
-
-        genresCursor.close();
-        return genresMap;
+        try {
+            thread.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

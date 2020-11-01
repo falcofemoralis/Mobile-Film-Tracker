@@ -2,8 +2,6 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.database.Cursor;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,7 +35,9 @@ public class FilmsListFragment extends Fragment {
     private ArrayList<Film> films = new ArrayList<>(); //список текуших фильмов
     private FilmAdapter adapter; //адаптер фильмов в RecyclerView
     private View view; //вью фрагмента
+    private int count; //кол-во FILMS_PER_SCROLL добавленно в адаптер
 
+    //создание объекта FilmsListFragment в случае жанра
     public static FilmsListFragment newInstance(Map.Entry<String, String> selectParam) {
         FilmsListFragment fragment = new FilmsListFragment();
         Bundle args = new Bundle();
@@ -47,6 +47,7 @@ public class FilmsListFragment extends Fragment {
         return fragment;
     }
 
+    //создание объекта FilmsListFragment в случае названия фильма
     public static FilmsListFragment newInstance(String selectParam) {
         FilmsListFragment fragment = new FilmsListFragment();
         Bundle args = new Bundle();
@@ -73,12 +74,14 @@ public class FilmsListFragment extends Fragment {
             progressBar = view.findViewById(R.id.fragment_filmslist_pb_loading);
             scrollView = getActivity().findViewById(R.id.nestedScrollView);
 
-            //устанаваливаем заголовок фрагмента (если параметр выборки жанр)
+            //устанаваливаем заголовок фрагмента (если параметр являетсяжанр)
             TextView genreText = view.findViewById(R.id.fragment_filmslist_films_tv_header);
-            if (isGenre) genreText.setText(getString(R.string.films, ResourcesManager.getGenreStringById(selectParam[1], getContext())));
-            else genreText.setVisibility(View.GONE);
+            if (isGenre)
+                genreText.setText(getString(R.string.films, ResourcesManager.getGenreStringById(selectParam[1], getContext())));
+            else
+                genreText.setVisibility(View.GONE);
 
-            setFilms();
+            initFilms();
         }
         return view;
     }
@@ -91,15 +94,15 @@ public class FilmsListFragment extends Fragment {
     }
 
     //метод инциализация списка фильмов
-    public void setFilms() {
+    public void initFilms() {
         final RecyclerView recyclerView = view.findViewById(R.id.fragment_filmslist_films_rv_films);
 
         //получаем фильмы
-        addFilms(new Runnable() {
+        getFilms(new Runnable() {
             @Override
             public void run() {
                 //создаем адаптер и добавляем его recyclerView
-                adapter = new FilmAdapter(getContext(), films);
+                adapter = new FilmAdapter(getContext(), films, getActivity());
                 recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
                 recyclerView.setAdapter(adapter);
 
@@ -117,45 +120,62 @@ public class FilmsListFragment extends Fragment {
                 int diff = (view.getBottom() - (scrollView.getHeight() + scrollView.getScrollY()));
 
                 //если мы опустились в самый низ
-                if (diff == 0) addFilms(new Runnable() {
-                    @Override
-                    public void run() {
-                        //обновляем адаптер фильмов в RecyclerView
-                        adapter.notifyDataSetChanged();
+                if (diff == 0) {
+                    //включаем бар загрузки
+                    progressBar.setVisibility(View.VISIBLE);
 
-                        //выключаем бар загрузки
-                        progressBar.setVisibility(View.GONE);
-                    }
-                });
+                    addFilms(new Runnable() {
+                        @Override
+                        public void run() {
+                            //обновляем адаптер фильмов в RecyclerView
+                            adapter.notifyItemRangeInserted(FILMS_PER_SCROLL * count, FILMS_PER_SCROLL);
+
+                            //выключаем бар загрузки
+                            progressBar.setVisibility(View.GONE);
+                        }
+                    });
+                }
             }
         });
     }
 
+    //метод получения фильмов в RecyclerView в количестве FILMS_PER_SCROLL штук
+    public void getFilms(final Runnable runnable) {
+        //проверяем были ли загруженны фильмы из базы данных
+        DatabaseManager databaseManager = DatabaseManager.getInstance(getContext());
+
+        //если курсор null (не были загруженны фильмы) получаем их из базы данных
+        final ArrayList<Cursor> cursorTmp = new ArrayList<>();
+        Runnable getFilmsRunnable = new Runnable() {
+            @Override
+            public void run() {
+                filmsCursor = cursorTmp.get(0);
+                addFilms(runnable);
+            }
+        };
+        if (isGenre)
+            databaseManager.getFilmsByGenre(selectParam[0], cursorTmp, getFilmsRunnable);
+        else databaseManager.getFilmsByTitle(selectParam[0], cursorTmp, getFilmsRunnable);
+    }
+
     //метод добавления фильмов в RecyclerView в количестве FILMS_PER_SCROLL штук
     public void addFilms(final Runnable runnable) {
-        final Handler mHandler = new Handler(Looper.getMainLooper());
-
-        //проверяем были ли загруженны фильмы из базы данных
-        if (filmsCursor == null) {
-            if (isGenre)
-                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByGenre(selectParam[0]);
-            else
-                filmsCursor = DatabaseManager.getInstance(getContext()).getFilmsByTitle(selectParam[0]);
-        }
-
-        //включаем бар загрузки
-        progressBar.setVisibility(View.VISIBLE);
-
-        (new Thread() {
+        new Thread(new Runnable() {
+            @Override
             public void run() {
-                //достаем FILMS_PER_SCROLL фильмов из курсора и добавляем в список
                 for (int i = 0; i < FILMS_PER_SCROLL; i++) {
                     if (filmsCursor.moveToNext())
                         films.add(DatabaseManager.getInstance(getContext()).getFilmData(filmsCursor));
                     else
                         break;
                 }
-                mHandler.post(runnable);
+                count++;
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        runnable.run();
+                    }
+                });
             }
         }).start();
     }

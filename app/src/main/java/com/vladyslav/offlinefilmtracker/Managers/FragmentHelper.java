@@ -8,7 +8,6 @@ import androidx.fragment.app.FragmentManager;
 import com.vladyslav.offlinefilmtracker.R;
 
 public class FragmentHelper {
-
     private static FragmentManager fragmentManager;
     private static Activity activity;
 

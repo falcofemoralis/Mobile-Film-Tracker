@@ -2,8 +2,6 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -49,62 +47,85 @@ public class SearchFragment extends Fragment {
 
     //метод инициализации поиска
     public void initSearch() {
-        final Handler mHandler = new Handler(Looper.getMainLooper());
-
-        (new Thread() {
+        final HashMap<String, String> films = new HashMap<>();
+        DatabaseManager.getInstance(getContext()).getAllFilms(films, new Runnable() {
+            @Override
             public void run() {
-                final HashMap<String, String> films = DatabaseManager.getInstance(getContext()).getAllFilms();
                 final ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), R.layout.custom_list_item, R.id.text_view_list_item, new ArrayList<>(films.keySet()));
 
-                mHandler.post(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
                     public void run() {
                         editText.setAdapter(adapter);
 
-                        //установка листенера выбора элемента (фильма)
-                        editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        setFilmOnClickPressed(films);
+                        setOnEnterPressed();
+                    }
+                });
+            }
+        });
+    }
+
+    //метод который устанавливает листенер в случае выбранного фильма из списка
+    public void setFilmOnClickPressed(final HashMap<String, String> films) {
+        //установка листенера выбора элемента (фильма)
+        editText.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //скрываем клавиатуру
+                imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+
+                //получаем объект фильма из хешмап
+                String titleId = films.get(editText.getText().toString());
+
+                //получем объект фильма по id
+                final Film[] film = new Film[1];
+                DatabaseManager.getInstance(getContext()).getFilmByTitleId(titleId, film, new Runnable() {
+                    @Override
+                    public void run() {
+                        getActivity().runOnUiThread(new Runnable() {
                             @Override
-                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                //скрываем клавиатуру
-                                imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
-
-                                //получаем объект фильма
-                                String titleId = films.get(editText.getText().toString());
-                                Film film = DatabaseManager.getInstance(getContext()).getFilmByTitleId(titleId);
-
-                                //скрываем подсказку
-                                hintsLayout.setVisibility(View.GONE);
-
-                                //меняем фрагмент на фрагмент фильма
-                                getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, FilmFragment.newInstance(film)).commit();
-                            }
-                        });
-                        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-                            @Override
-                            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                                //в случае нажатия кнопки Enter на клавиаутре будет показан список фильмов
-                                if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT)) {
-                                    editText.dismissDropDown();
-                                    String text = editText.getText().toString();
-
-                                    //проверяем ведденный текст
-                                    if (text.equals("")) {
-                                        Toast.makeText(getContext(), getString(R.string.enter_film_name), Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        //скрываем подсказку
-                                        hintsLayout.setVisibility(View.GONE);
-
-                                        //меняем фрагмент на фрагмент категории
-                                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, FilmsListFragment.newInstance(text)).commit();
-                                    }
-
-                                }
-                                return false;
+                            public void run() {
+                                showFilmFragment(film[0]);
                             }
                         });
                     }
                 });
             }
+        });
+    }
 
-        }).start();
+    public void showFilmFragment(Film film) {
+        //скрываем подсказку
+        hintsLayout.setVisibility(View.GONE);
+
+        //меняем фрагмент на фрагмент фильма
+        getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, FilmFragment.newInstance(film)).commit();
+    }
+
+    //метод который устанавливает листенер для нажатой кнопки enter
+    public void setOnEnterPressed() {
+        editText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                //в случае нажатия кнопки Enter на клавиаутре будет показан список фильмов
+                if ((actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_NEXT)) {
+                    editText.dismissDropDown();
+                    String text = editText.getText().toString();
+
+                    //проверяем ведденный текст
+                    if (text.equals("")) {
+                        Toast.makeText(getContext(), getString(R.string.enter_film_name), Toast.LENGTH_SHORT).show();
+                    } else {
+                        //скрываем подсказку
+                        hintsLayout.setVisibility(View.GONE);
+
+                        //меняем фрагмент на фрагмент категории
+                        getParentFragmentManager().beginTransaction().replace(R.id.fragment_search_fragment_container, FilmsListFragment.newInstance(text)).commit();
+                    }
+                }
+                return false;
+            }
+        });
     }
 }

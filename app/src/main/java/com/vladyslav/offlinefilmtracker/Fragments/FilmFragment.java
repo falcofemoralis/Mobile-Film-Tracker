@@ -59,7 +59,7 @@ public class FilmFragment extends Fragment {
 
             setBaseFilmInfo();
             setAdditionalFilmInfo();
-            setCrew();
+            getCrew();
         }
         return view;
     }
@@ -70,12 +70,23 @@ public class FilmFragment extends Fragment {
         ((TextView) view.findViewById(R.id.fragment_film_tv_rating)).setText(getString(R.string.rating, film.getRating(), film.getVotes()));
         ((TextView) view.findViewById(R.id.fragment_film_tv_title)).setText(film.getTitle());
 
-        //устанавливаем постер
-        ImageView posterView = view.findViewById(R.id.fragment_film_iv_poster);
-        BitmapDrawable poster = film.getPoster(getContext());
-        posterView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(poster.getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext())),
-                (ResourcesManager.getDpFromPx(poster.getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext()))));
-        posterView.setImageDrawable(poster);
+        final BitmapDrawable[] poster = new BitmapDrawable[1];
+        film.getPoster(getContext(), poster, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        //устанавливаем постер
+                        ImageView posterView = view.findViewById(R.id.fragment_film_iv_poster);
+
+                        posterView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(poster[0].getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext())),
+                                (ResourcesManager.getDpFromPx(poster[0].getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext()))));
+                        posterView.setImageDrawable(poster[0]);
+                    }
+                });
+            }
+        });
 
         //устанавливаем жанры фильма
         String[] filmGenres = film.getGenres();
@@ -101,9 +112,23 @@ public class FilmFragment extends Fragment {
             adult.setVisibility(View.GONE);
     }
 
+    public void getCrew() {
+        final ArrayList<Actor> actors = new ArrayList<>();
+        DatabaseManager.getInstance(view.getContext()).getActorsByTitleId(film.getFilm_id(), actors, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        setCrew(actors);
+                    }
+                });
+            }
+        });
+    }
+
     //метод установки кооманды фильма
-    public void setCrew() {
-        Actor[] actors = DatabaseManager.getInstance(view.getContext()).getActorsByTitleId(film.getFilm_id());
+    public void setCrew(ArrayList<Actor> actors) {
         LinearLayout actorsLayout = view.findViewById(R.id.fragment_film_ll_actorsLayout);
 
         //список людей по ролям т.е список режисеров, продюсеров и писателей
@@ -159,17 +184,28 @@ public class FilmFragment extends Fragment {
 
     //метод установки актера в строку актеров
     public void setActor(final Actor actor, LinearLayout actorsLayout) {
-        LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
+        final LinearLayout layout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_actor, null);
 
         //ставим имя актера
         ((TextView) layout.getChildAt(1)).setText(actor.getName());
 
         //ставим фото актера
-        BitmapDrawable photo = actor.getPhoto(getContext());
-        ImageView photoView = (ImageView) layout.getChildAt(0);
-        photoView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(photo.getBitmap().getWidth(), PHOTO_SCALE_FACTOR, getContext())),
-                (ResourcesManager.getDpFromPx(photo.getBitmap().getHeight(), PHOTO_SCALE_FACTOR, getContext()))));
-        photoView.setImageDrawable(photo);
+        final BitmapDrawable[] photo = new BitmapDrawable[1];
+        actor.getPhoto(getContext(), photo, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ImageView photoView = (ImageView) layout.getChildAt(0);
+                        photoView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(photo[0].getBitmap().getWidth(), PHOTO_SCALE_FACTOR, getContext())),
+                                (ResourcesManager.getDpFromPx(photo[0].getBitmap().getHeight(), PHOTO_SCALE_FACTOR, getContext()))));
+                        photoView.setImageDrawable(photo[0]);
+
+                    }
+                });
+            }
+        });
 
         //устанавливаем персонажей актера в фильме
         TextView charactersTV = (TextView) layout.getChildAt(2);

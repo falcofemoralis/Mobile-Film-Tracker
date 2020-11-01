@@ -8,14 +8,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
+import android.os.Message;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
+import com.vladyslav.offlinefilmtracker.Activities.MainActivity;
 import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.FileOutputStream;
@@ -23,9 +23,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 
-import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.callableStart;
 import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.links;
-import static com.vladyslav.offlinefilmtracker.Activities.MainActivity.progressDialog;
 
 public class DownloadService extends Service {
     private boolean running = true;
@@ -74,10 +72,10 @@ public class DownloadService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         super.onStartCommand(intent, flags, startId);
-        final Handler mHandler = new Handler(Looper.getMainLooper());
 
         (new Thread() {
             public void run() {
+                Message msg = null;
                 try {
                     for (int i = 0; i < links.size(); ++i) {
                         URL url = new URL(links.get(i).first);
@@ -93,21 +91,23 @@ public class DownloadService extends Service {
 
                         //получаем максимальный размер файла
                         final int lengthOfFile = connection.getContentLength();
-                        mHandler.post(new Runnable() {
-                            public void run() {
-                                progressDialog.setMax(lengthOfFile / 1024 / 1024);
-                            }
-                        });
+
+                        //устанавливаем в главном потоке максимальный размер файла в прогресс диалоге
+                        msg = MainActivity.hMain.obtainMessage();
+                        msg.what = MainActivity.SETPROGRESSMAX;
+                        msg.obj = lengthOfFile / 1024 / 1024;
+                        MainActivity.hMain.sendMessage(msg);
 
                         //скачиваем файл
                         while ((count = inputStream.read(data)) != -1 && running) {
                             total += count;
                             final long finalTotal = total;
-                            mHandler.post(new Runnable() {
-                                public void run() {
-                                    progressDialog.setProgress(Integer.parseInt(String.valueOf((int) (finalTotal / 1024 / 1024))));
-                                }
-                            });
+
+                            //устанавливаем прогресс
+                            msg = MainActivity.hMain.obtainMessage();
+                            msg.what = MainActivity.SETPROGRESS;
+                            msg.obj = (int) (finalTotal / 1024 / 1024);
+                            MainActivity.hMain.sendMessage(msg);
                             outputStream.write(data, 0, count);
                         }
 
@@ -116,29 +116,22 @@ public class DownloadService extends Service {
                     }
 
                     stopSelf();
-                    mHandler.post(new Runnable() {
-                        public void run() {
-                            try {
-                                callableStart.call();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-                    });
+
+                    msg = MainActivity.hMain.obtainMessage();
+                    msg.what = MainActivity.SETBOTTOMBAR;
+                    MainActivity.hMain.sendMessage(msg);
                 } catch (Exception e) {
                     stopSelf();
-                    mHandler.post(new Runnable() {
-                        public void run() {
-                            progressDialog.setTitle(getString(R.string.downloading_error));
-                        }
-                    });
+
+                    msg = MainActivity.hMain.obtainMessage();
+                    msg.what = MainActivity.FAILED;
+                    MainActivity.hMain.sendMessage(msg);
                     e.printStackTrace();
                 }
             }
         }).start();
         return START_STICKY;
     }
-
 
     @Override
     public void onDestroy() {

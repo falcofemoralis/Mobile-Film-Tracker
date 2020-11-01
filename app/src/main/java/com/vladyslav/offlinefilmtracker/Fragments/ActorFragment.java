@@ -1,8 +1,7 @@
 package com.vladyslav.offlinefilmtracker.Fragments;
 
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -69,7 +68,19 @@ public class ActorFragment extends Fragment {
     //метод установки базовой информации актера (имя, фото, даты рождения/смерти)
     public void setActorBaseInfo() {
         ((TextView) view.findViewById(R.id.fragment_actor_films_tv_name)).setText(actor.getName());
-        ((ImageView) view.findViewById(R.id.fragment_actor_films_iv_photo)).setImageDrawable(actor.getPhoto(getContext()));
+
+        final BitmapDrawable[] photo = new BitmapDrawable[1];
+        actor.getPhoto(getContext(), photo, new Runnable() {
+            @Override
+            public void run() {
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ((ImageView) view.findViewById(R.id.fragment_actor_films_iv_photo)).setImageDrawable(photo[0]);
+                    }
+                });
+            }
+        });
 
         //установка даты рождения актера
         TextView bornTV = view.findViewById(R.id.fragment_actor_films_tv_born);
@@ -86,8 +97,6 @@ public class ActorFragment extends Fragment {
 
     //метод установки фильмов
     public void setFilms() {
-        final Handler mHandler = new Handler(Looper.getMainLooper());
-
         final Map<String, Integer> rolesMap = new HashMap<String, Integer>() {{
             put("actor", 0);
             put("director", 1);
@@ -101,13 +110,13 @@ public class ActorFragment extends Fragment {
             filmByRoles.add(list);
         }
 
+        final ArrayList<Film> films = new ArrayList<>();
         progressBar.setVisibility(View.VISIBLE);
 
-        (new Thread() {
+        //получаем фильмы по жанру
+        DatabaseManager.getInstance(getContext()).getFilmsByPersonId(actor.getPerson_id(), films, new Runnable() {
+            @Override
             public void run() {
-                //получаем фильмы по жанру
-                Film[] films = DatabaseManager.getInstance(getContext()).getFilmsByPersonId(actor.getPerson_id());
-
                 //распределяем фильмы в зависимости от роли
                 for (Film film : films) {
                     String[] roles = DatabaseManager.getInstance(getContext()).getRoleByPersonAndTitleId(actor.getPerson_id(), film.getFilm_id());
@@ -122,8 +131,7 @@ public class ActorFragment extends Fragment {
                     }
                 }
 
-                //устанавливаем полученные фильмы в строки в UI потоке
-                mHandler.post(new Runnable() {
+                getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
@@ -140,23 +148,23 @@ public class ActorFragment extends Fragment {
                                 textView.setTextAppearance(R.style.Header);
 
                                 //устанавливаем текст заголовка
-                                textView.setText(ResourcesManager.getRoleById(getKey(rolesMap, i),getContext()));
+                                textView.setText(ResourcesManager.getRoleById(getKey(rolesMap, i), getContext()));
                                 baseLayout.addView(textView);
 
                                 //создаем RecyclerView (список фильмов)
                                 RecyclerView recyclerView = new RecyclerView(getContext());
                                 recyclerView.setLayoutParams(layoutParams);
                                 recyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
-                                FilmAdapter adapter = new FilmAdapter(getContext(), filmByRoles.get(i));
+                                FilmAdapter adapter = new FilmAdapter(getContext(), filmByRoles.get(i), getActivity());
                                 recyclerView.setAdapter(adapter);
                                 baseLayout.addView(recyclerView);
                             }
                         }
-                        view.findViewById(R.id.fragment_actor_pb_loading).setVisibility(View.GONE);
+                        progressBar.setVisibility(View.GONE);
                     }
                 });
             }
-        }).start();
+        });
     }
 
     //метод получаем ключа из хешмапы

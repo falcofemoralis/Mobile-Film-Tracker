@@ -48,8 +48,14 @@ public class Actor implements Serializable {
         return category;
     }
 
-    public BitmapDrawable getPhoto(Context context) {
-        return ResourcesManager.getInstance(context).getDrawableById(person_id, false);
+    public void getPhoto(final Context context, final BitmapDrawable[] photo, final Runnable runnable) {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                photo[0] = ResourcesManager.getInstance(context).getPhotoDrawableById(person_id);
+                runnable.run();
+            }
+        })).start();
     }
 
     @Override

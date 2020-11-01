@@ -5,6 +5,8 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Pair;
 import android.view.MenuItem;
 
@@ -24,20 +26,22 @@ import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.R;
 import com.vladyslav.offlinefilmtracker.Services.DownloadService;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
 
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fm; //менеджер фрагментов
     private Intent intent; //интент сервиса скачивания файлов
-    public static Callable callableStart; //callable вызова установки боттом бара
-    public static ProgressDialog progressDialog; //диалог прогресса скачивания файлов
+    private ProgressDialog progressDialog; //диалог прогресса скачивания файлов
     public static ArrayList<Pair<String, String>> links = new ArrayList<>(); //ссылки для скачивания необходимых файлов
+    public static final int SETPROGRESSMAX = 1, SETPROGRESS = 2, SETBOTTOMBAR = 3, FAILED = 4;
+    public static Handler hMain;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        hMain = new MyHandler(this);
 
         //инциализация помошника по фрагментам
         fm = getSupportFragmentManager();
@@ -96,15 +100,6 @@ public class MainActivity extends AppCompatActivity {
                 });
         progressDialog.show();
 
-        callableStart = new Callable() {
-            @Override
-            public Object call() {
-                progressDialog.hide();
-                setBottomBar();
-                return null;
-            }
-        };
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
             startForegroundService(intent);
         else startService(intent);
@@ -160,10 +155,43 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (hMain != null) hMain.removeCallbacksAndMessages(null);
+
         //если пользователь закрыл приложение, сервис останавливается
         if (intent != null) stopService(intent);
         finishAndRemoveTask();
         super.onDestroy();
+    }
+
+    static class MyHandler extends Handler {
+        WeakReference<MainActivity> wrActivity; //слабая ссылка на активити не препятствует его уничтожению
+
+        public MyHandler(MainActivity activity) {
+            wrActivity = new WeakReference<>(activity);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            MainActivity activity = wrActivity.get();
+            if (activity != null) {
+                switch (msg.what) {
+                    case SETPROGRESSMAX:
+                        activity.progressDialog.setMax(Integer.parseInt(msg.obj.toString()));
+                        break;
+                    case SETPROGRESS:
+                        activity.progressDialog.setProgress(Integer.parseInt(msg.obj.toString()));
+                        break;
+                    case SETBOTTOMBAR:
+                        activity.progressDialog.hide();
+                        activity.setBottomBar();
+                        break;
+                    case FAILED:
+                        activity.progressDialog.setTitle(activity.getString(R.string.downloading_error));
+                        break;
+                }
+            }
+        }
     }
 }
 

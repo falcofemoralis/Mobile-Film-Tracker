@@ -43,6 +43,34 @@ public class ResourcesManager {
         instance = null;
     }
 
+    //получение постера по id фильма
+    public BitmapDrawable getPosterDrawableById(final String fileName) {
+        InputStream fileStream = null;
+        try {
+            fileStream = postersZip.getInputStream(fileName + ".jpeg");
+            if (fileStream == null) {
+                fileStream = postersZip.getInputStream("noimage_poster.jpeg");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return (BitmapDrawable) BitmapDrawable.createFromStream(fileStream, null);
+    }
+
+    //получение фотографии по id актера
+    public BitmapDrawable getPhotoDrawableById(final String fileName) {
+        InputStream fileStream = null;
+        try {
+            fileStream = photosZip.getInputStream(fileName + ".jpeg");
+            if (fileStream == null)
+                fileStream = photosZip.getInputStream("noimage_photo.jpeg");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return (BitmapDrawable) BitmapDrawable.createFromStream(fileStream, null);
+    }
+
     //перевод пикселей в dp
     public static int getDpFromPx(int px, double size, Context context) {
         float scale = context.getResources().getDisplayMetrics().density;
@@ -53,25 +81,6 @@ public class ResourcesManager {
     public static int getPxFromDp(int dp, Context context) {
         final float scale = context.getResources().getDisplayMetrics().density;
         return (int) (dp * scale + 0.5f);
-    }
-
-    //получение постера по id фильма или фотографии по id актера
-    public BitmapDrawable getDrawableById(final String fileName, final boolean type) {
-        InputStream fileStream = null;
-
-        try {
-            if (type) fileStream = postersZip.getInputStream(fileName + ".jpeg");
-            else fileStream = photosZip.getInputStream(fileName + ".jpeg");
-
-            if (fileStream == null) {
-                if (type) fileStream = postersZip.getInputStream("noimage_poster.jpeg");
-                else fileStream = photosZip.getInputStream("noimage_photo.jpeg");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return (BitmapDrawable) BitmapDrawable.createFromStream(fileStream, null);
     }
 
     public static String getGenreStringById(String name, Context context) {
