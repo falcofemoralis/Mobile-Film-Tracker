@@ -2,7 +2,6 @@ package com.vladyslav.offlinefilmtracker.Fragments;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,7 @@ import java.util.Map;
 public class CategoriesFragment extends Fragment {
     private View view;  //вью фрагмента
     private GridLayout baseLayout; //лаяут с кнопками
+    private DatabaseManager databaseManager;
 
     @SuppressLint("ClickableViewAccessibility")
     @Nullable
@@ -33,6 +33,7 @@ public class CategoriesFragment extends Fragment {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_categories, container, false);
             baseLayout = view.findViewById(R.id.fragment_categories_ll_main);
+            databaseManager = DatabaseManager.getInstance(getContext());
 
             setCategories();
         }
@@ -46,28 +47,21 @@ public class CategoriesFragment extends Fragment {
         int btnSize = ((getContext().getResources().getDisplayMetrics().widthPixels) / 3) - btnMargin * 2;
 
         //получаем все жанры
-        HashMap<String, String> genres = DatabaseManager.getInstance(getContext()).getGenresMap();
-        for (final Map.Entry<String, String> genreEntry : genres.entrySet()) {
+        HashMap<Integer, String> genres = databaseManager.getGenresMap();
+        for (final Map.Entry<Integer, String> genreEntry : genres.entrySet()) {
             //создаем кнопку
             Button btn = (Button) LayoutInflater.from(getContext()).inflate(R.layout.inflate_category_button, null);
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(btnSize, btnSize);
             lp.setMargins(btnMargin, btnMargin, btnMargin, btnMargin);
             btn.setLayoutParams(lp);
-            btn.setText(ResourcesManager.getGenreStringById(genreEntry.getValue(), getContext()));       //устанавливаем текст
+            btn.setText(databaseManager.getGenreById(genreEntry.getKey())); //устанавливаем текст
 
             //устанавливаем иконку
-            try {
-                int drawableId = getContext().getResources().getIdentifier("ic_category_" + ResourcesManager.normalizeGenreString(genreEntry.getValue()), "drawable", getContext().getPackageName());
-                btn.setCompoundDrawablesWithIntrinsicBounds(null, getContext().getDrawable(drawableId), null, null);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            //добавляем нажатие кнопки
+            btn.setCompoundDrawablesWithIntrinsicBounds(null, ResourcesManager.getInstance(getContext()).getGenreDrawableById(genreEntry.getKey()), null, null);
             btn.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    FragmentHelper.openFragment(FilmsListFragment.newInstance(genreEntry));
+                    FragmentHelper.openFragment(FilmsListFragment.newInstance(genreEntry.getKey()));
                 }
             });
             baseLayout.addView(btn);

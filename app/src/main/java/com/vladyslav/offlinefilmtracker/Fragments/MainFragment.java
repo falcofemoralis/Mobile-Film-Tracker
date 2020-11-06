@@ -21,7 +21,6 @@ import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 public class MainFragment extends Fragment {
@@ -32,17 +31,8 @@ public class MainFragment extends Fragment {
     private DatabaseManager databaseManager; //менджер базы данных
     private int moreBtnHeight; //размер кнопки More
 
-    //хешмап из ключа жанра (в базе) и id строковой константы, где -1 = Popular
-    public final LinkedHashMap<String, String> genres = new LinkedHashMap<String, String>() {
-        {
-            put("-1", "popular");
-            put("1", "action");
-            put("9", "scifi");
-            put("16", "fantasy");
-            put("21", "comedy");
-            put("18", "animation");
-        }
-    };
+    //массив id жанров
+    public final Integer[] genres = {-1, 1, 9, 16, 21, 18};
 
     @Nullable
     @Override
@@ -60,8 +50,7 @@ public class MainFragment extends Fragment {
     //загружаем фильмы из базы по жанрам
     public void getFilmsFromDatabase() {
         ArrayList<Thread> threads = new ArrayList<>();
-        for (final Map.Entry<String, String> genreEntry : genres.entrySet()) {
-            final String genreId = genreEntry.getKey(); //id жанра в базе
+        for (final Integer genreId : genres) {
             final ArrayList<Film> films = new ArrayList<>(); //список фильмов, в него будет загружены фильмы из базы
 
             //получаем в фильмы из базы и устанавливаем ряд из них
@@ -72,13 +61,13 @@ public class MainFragment extends Fragment {
                         getActivity().runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                createFilmRow(films, genreEntry);
+                                createFilmRow(films, genreId);
                             }
                         });
                     }
                 };
 
-                if (genreId.equals("-1"))
+                if (genreId == -1)
                     threads.add(databaseManager.getPopularFilms(FILMS_IN_ROW, films, runnable));
                 else
                     threads.add(databaseManager.getFilmsByGenre(genreId, 2015, FILMS_IN_ROW, films, runnable));
@@ -100,15 +89,15 @@ public class MainFragment extends Fragment {
     }
 
     //создаем ряд с фильмами
-    public void createFilmRow(ArrayList<Film> films, final Map.Entry<String, String> genreEntry) {
+    public void createFilmRow(ArrayList<Film> films, final Integer genreId) {
         final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //строка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, ResourcesManager.getGenreStringById(genreEntry.getValue(), getContext()))); //устанавливаем заголовок строки
+        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, databaseManager.getGenreById(genreId))); //устанавливаем заголовок строки
 
         final LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
-                if (!genreEntry.getKey().equals("-1")) addMoreBtn(linearLayout, genreEntry);
+                if (genreId != -1) addMoreBtn(linearLayout, genreId);
                 baseLayout.addView(filmsLayout); //добавляем в корень
             }
         };
@@ -167,13 +156,13 @@ public class MainFragment extends Fragment {
     }
 
     //добавляем кнопку открытия всех фильмов по категории
-    public void addMoreBtn(LinearLayout baseLayout, final Map.Entry<String, String> genreEntry) {
+    public void addMoreBtn(LinearLayout baseLayout, final int genreId) {
         LinearLayout moreBtnLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_more, null);
         ImageView moreBtn = (ImageView) moreBtnLayout.getChildAt(0);
         moreBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                FragmentHelper.openFragment(FilmsListFragment.newInstance(genreEntry));
+                FragmentHelper.openFragment(FilmsListFragment.newInstance(genreId));
             }
         });
         ViewGroup.LayoutParams layoutParams = moreBtn.getLayoutParams();

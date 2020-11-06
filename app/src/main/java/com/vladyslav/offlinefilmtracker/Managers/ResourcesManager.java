@@ -2,6 +2,7 @@ package com.vladyslav.offlinefilmtracker.Managers;
 
 import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import com.google.android.vending.expansion.zipfile.ZipResourceFile;
 import com.vladyslav.offlinefilmtracker.R;
@@ -14,9 +15,13 @@ import java.lang.reflect.Field;
 public class ResourcesManager {
     private static ResourcesManager instance;
     public ZipResourceFile photosZip, postersZip;
+    private String[] genres;
+    private Context context;
 
     public ResourcesManager(Context context) {
         String obbFilePath = context.getObbDir().getPath();
+        genres = context.getResources().getStringArray(R.array.genres);
+        this.context = context;
 
         try {
             photosZip = new ZipResourceFile(obbFilePath + "/photos.zip");
@@ -70,6 +75,19 @@ public class ResourcesManager {
         return (BitmapDrawable) BitmapDrawable.createFromStream(fileStream, null);
     }
 
+    public Drawable getGenreDrawableById(int genreId) {
+        //устанавливаем иконку
+        Drawable drawable = null;
+        try {
+            int drawableId = context.getResources().getIdentifier("ic_category_" + genres[genreId-1], "drawable", context.getPackageName());
+            drawable = context.getDrawable(drawableId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return drawable;
+    }
+
     //перевод пикселей в dp
     public static int getDpFromPx(int px, double size, Context context) {
         float scale = context.getResources().getDisplayMetrics().density;
@@ -82,22 +100,6 @@ public class ResourcesManager {
         return (int) (dp * scale + 0.5f);
     }
 
-    public static String getGenreStringById(String name, Context context) {
-        try {
-            Field idField = R.string.class.getDeclaredField("genre_" + normalizeGenreString(name));
-            return context.getString(idField.getInt(idField));
-        } catch (NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public static String normalizeGenreString(String name) {
-        String genreString = name.toLowerCase();
-        if (genreString.equals("sci-fi"))
-            genreString = genreString.replace("-", ""); //удаляем "-" из жанра
-        return genreString;
-    }
 
     public static String getRoleById(String name, Context context) {
         try {

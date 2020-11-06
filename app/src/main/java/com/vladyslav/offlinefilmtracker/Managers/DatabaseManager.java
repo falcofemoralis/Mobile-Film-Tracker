@@ -7,27 +7,47 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
 import com.vladyslav.offlinefilmtracker.Objects.Film;
+import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
 
 //SINGLETON
 public class DatabaseManager extends SQLiteOpenHelper {
     private final static int DATABASE_VERSION = 1;
-    private final static String DATABASE_NAME = "imdb.db";
+    private final static String DATABASE_NAME = "filmsdb.db";
     private static DatabaseManager instance;
     public SQLiteDatabase database;
-    private HashMap<String, String> genresMap = new HashMap<>();
+    private HashMap<Integer, String> genresMap = new HashMap<>();
+    private Context context;
+    private String lang;
+    final String FILM_SELECT_QUERY = "SELECT * " +
+            "FROM films " +
+            "INNER JOIN films_Translated ON films.title_id=films_Translated.title_id " +
+            "INNER JOIN ratings ON films.title_id=ratings.title_id ";
+
 
     public DatabaseManager(Context context, String path) {
         super(context, path, null, DATABASE_VERSION);
+        this.context = context;
         database = getReadableDatabase();
+
+        String locale = Locale.getDefault().getLanguage();
+        if (!locale.equals("en") && !locale.equals("ru") && !locale.equals("uk"))
+            locale = "en";
+
+        Cursor cursor = database.rawQuery("SELECT languages.lang_id FROM languages WHERE languages.lang = ?", new String[]{locale});
+        cursor.moveToFirst();
+        this.lang = cursor.getString(0);
+        cursor.close();
     }
 
     public static DatabaseManager getInstance(Context context) {
         if (instance == null) {
             String path = context.getObbDir().getPath() + "/" + DATABASE_NAME;
+
             File file = new File(path);
             if (!(file.exists() && !file.isDirectory()))
                 return null;
@@ -54,10 +74,12 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = database.rawQuery("SELECT * " +
-                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                        "WHERE ratings.rating > 7 AND ratings.votes > 5000 AND titles.premiered = 2020 " +
-                        "ORDER BY ratings.votes DESC LIMIT ?", new String[]{String.valueOf(limit)});
+                Cursor cursor = database.rawQuery(FILM_SELECT_QUERY +
+                        "WHERE films_Translated.lang_id = ? and ratings.rating > 6.6 AND ratings.votes > 40000 AND films.premiered = 2020 " +
+                        "ORDER BY ratings.votes DESC " +
+                        "LIMIT ?", new String[]{lang, String.valueOf(limit)});
+
+
                 while (cursor.moveToNext())
                     films.add(getFilmData(cursor));
 
@@ -72,14 +94,14 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получаем фильмов по жанру и году с ограничением
-    public Thread getFilmsByGenre(final String genreId, final int premiered, final int limit, final ArrayList<Film> films, final Runnable runnable) {
+    public Thread getFilmsByGenre(final int genreId, final int premiered, final int limit, final ArrayList<Film> films, final Runnable runnable) {
         return new Thread(new Runnable() {
             @Override
             public void run() {
                 String genreParam = "%" + genreId + "%";
-                Cursor cursor = database.rawQuery("SELECT * " +
-                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                        "WHERE titles.genres like ? AND titles.premiered > ? LIMIT ?", new String[]{genreParam, String.valueOf(premiered), String.valueOf(limit)});
+                Cursor cursor = database.rawQuery(FILM_SELECT_QUERY +
+                        "WHERE films_Translated.lang_id = ? and films.genres like ? AND films.premiered > ? " +
+                        "LIMIT ?", new String[]{lang, genreParam, String.valueOf(premiered), String.valueOf(limit)});
                 while (cursor.moveToNext())
                     films.add(getFilmData(cursor));
 
@@ -95,15 +117,14 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получение фильмов по жанру
-    public void getFilmsByGenre(final String genreId, final ArrayList<Cursor> cursor, final Runnable runnable) {
+    public void getFilmsByGenre(final int genreId, final ArrayList<Cursor> cursor, final Runnable runnable) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 String genreParam = "%" + genreId + "%";
-                cursor.add(database.rawQuery("SELECT * " +
-                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                        "WHERE titles.genres like ? " +
-                        "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{genreParam}));
+                cursor.add(database.rawQuery(FILM_SELECT_QUERY +
+                        "WHERE films_Translated.lang_id = ? and films.genres like ? " +
+                        "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{lang, genreParam}));
                 try {
                     runnable.run();
                 } catch (Exception e) {
@@ -119,9 +140,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
             @Override
             public void run() {
                 String titleParam = "%" + title + "%";
-                cursor.add(database.rawQuery("SELECT * " +
-                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                        "WHERE titles.primary_title like ?", new String[]{titleParam}));
+                cursor.add(database.rawQuery(FILM_SELECT_QUERY +
+                        "WHERE films_Translated.lang_id = ? and films_Translated.title like ?", new String[]{lang, titleParam}));
                 try {
                     runnable.run();
                 } catch (Exception e) {
@@ -164,8 +184,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
                         "WHERE crew.person_id = ?" +
                         "ORDER BY ratings.rating DESC", new String[]{personId});
                 while (cursor.moveToNext()) {
-                    Cursor cursor_films = database.rawQuery("SELECT * " +
-                            "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id WHERE titles.title_id = ?", new String[]{cursor.getString(cursor.getColumnIndex("title_id"))});
+                    Cursor cursor_films = database.rawQuery(FILM_SELECT_QUERY +
+                            " WHERE films_Translated.lang_id = ? and films.title_id = ?", new String[]{lang, cursor.getString(cursor.getColumnIndex("title_id"))});
                     cursor_films.moveToFirst();
                     films.add(getFilmData(cursor_films));
                 }
@@ -196,10 +216,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
         (new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = database.rawQuery("SELECT titles.primary_title, titles.title_id " +
-                        "FROM titles", null);
+                Cursor cursor = database.rawQuery("SELECT films_Translated.title_id, films_Translated.title " +
+                        "FROM films_Translated " +
+                        "WHERE films_Translated.lang_id = ?", new String[]{lang});
                 while (cursor.moveToNext())
-                    films.put(cursor.getString(cursor.getColumnIndex("primary_title")), cursor.getString(cursor.getColumnIndex("title_id")));
+                    films.put(cursor.getString(cursor.getColumnIndex("title")), cursor.getString(cursor.getColumnIndex("title_id")));
 
                 cursor.close();
                 runnable.run();
@@ -212,9 +233,8 @@ public class DatabaseManager extends SQLiteOpenHelper {
         (new Thread(new Runnable() {
             @Override
             public void run() {
-                Cursor cursor = database.rawQuery("SELECT * " +
-                        "FROM titles INNER JOIN ratings ON titles.title_id=ratings.title_id " +
-                        "WHERE titles.title_id = ?", new String[]{titleId});
+                Cursor cursor = database.rawQuery(FILM_SELECT_QUERY +
+                        "WHERE films_Translated.lang_id = ? AND films.title_id = ?", new String[]{lang, titleId});
                 cursor.moveToFirst();
                 film[0] = getFilmData(cursor);
 
@@ -223,12 +243,13 @@ public class DatabaseManager extends SQLiteOpenHelper {
         })).start();
     }
 
-    public String getGenreById(String id) {
+    public String getGenreById(int id) {
         if (genresMap.size() == 0) loadGenres();
-        return genresMap.get(id);
+        if (id == -1) return context.getString(R.string.genre_popular);
+        else return genresMap.get(id);
     }
 
-    public HashMap<String, String> getGenresMap() {
+    public HashMap<Integer, String> getGenresMap() {
         if (genresMap.size() == 0) loadGenres();
         return genresMap;
     }
@@ -237,7 +258,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
     public Film getFilmData(Cursor cursor) {
         //создаем объект фильма
         return new Film(cursor.getString(cursor.getColumnIndex("title_id")),
-                cursor.getString(cursor.getColumnIndex("primary_title")),
+                cursor.getString(cursor.getColumnIndex("title")),
                 cursor.getString(cursor.getColumnIndex("rating")),
                 cursor.getString(cursor.getColumnIndex("votes")),
                 cursor.getString(cursor.getColumnIndex("runtime_minutes")),
@@ -252,11 +273,12 @@ public class DatabaseManager extends SQLiteOpenHelper {
             @Override
             public void run() {
                 Cursor genresCursor;
-                genresCursor = database.rawQuery("SELECT genres.genre, genres.genre_id " +
-                        "FROM genres", null);
+                genresCursor = database.rawQuery("SELECT genres.genre_id, genres.genre " +
+                        "FROM genres " +
+                        "WHERE genres.lang_id = ?", new String[]{lang});
 
                 while (genresCursor.moveToNext())
-                    genresMap.put(genresCursor.getString(1), genresCursor.getString(0));
+                    genresMap.put(genresCursor.getInt(0), genresCursor.getString(1));
 
                 genresCursor.close();
             }

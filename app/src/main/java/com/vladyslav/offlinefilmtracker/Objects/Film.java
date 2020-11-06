@@ -4,7 +4,6 @@ import android.content.Context;
 import android.graphics.drawable.BitmapDrawable;
 
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
-import com.vladyslav.offlinefilmtracker.R;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -12,9 +11,9 @@ import java.util.Arrays;
 public class Film implements Serializable {
     private String film_id, title, rating, votes, runtime_minutes, premiered, plot;
     private boolean isAdult;
-    private String[] genres;
+    private int[] genresId;
 
-    public Film(String film_id, String title, String rating, String votes, String runtime_minutes, String premiered, String isAdult, String[] genres, String plot) {
+    public Film(String film_id, String title, String rating, String votes, String runtime_minutes, String premiered, String isAdult, String[] genresIdString, String plot) {
         this.film_id = film_id;
         this.title = title;
         this.rating = rating;
@@ -22,7 +21,12 @@ public class Film implements Serializable {
         this.runtime_minutes = runtime_minutes;
         this.premiered = premiered;
         this.isAdult = Boolean.parseBoolean(isAdult);
-        this.genres = genres;
+
+        this.genresId = new int[genresIdString.length];
+        for (int i = 0; i < genresIdString.length; ++i) {
+            genresId[i] = Integer.parseInt(genresIdString[i]);
+        }
+
         this.plot = plot;
     }
 
@@ -64,8 +68,8 @@ public class Film implements Serializable {
         return isAdult;
     }
 
-    public String[] getGenres() {
-        return genres;
+    public int[] getGenresId() {
+        return genresId;
     }
 
     public String getPlot() {
@@ -83,7 +87,7 @@ public class Film implements Serializable {
                 ", premiered='" + premiered + '\'' +
                 ", plot='" + plot + '\'' +
                 ", isAdult=" + isAdult +
-                ", genres=" + Arrays.toString(genres) +
+                ", genresId=" + Arrays.toString(genresId) +
                 '}';
     }
 }

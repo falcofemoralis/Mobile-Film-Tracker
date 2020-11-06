@@ -89,12 +89,12 @@ public class FilmFragment extends Fragment {
         });
 
         //устанавливаем жанры фильма
-        String[] filmGenres = film.getGenres();
+        int[] filmGenresId = film.getGenresId();
         LinearLayout genresLayout = view.findViewById(R.id.fragment_film_ll_genres);
 
-        for (String genre : filmGenres) {
+        for (int genreId : filmGenresId) {
             TextView genresTV = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
-            genresTV.setText(ResourcesManager.getGenreStringById(DatabaseManager.getInstance(getContext()).getGenreById(genre), getContext()));
+            genresTV.setText(DatabaseManager.getInstance(getContext()).getGenreById(genreId));
             genresLayout.addView(genresTV);
         }
     }

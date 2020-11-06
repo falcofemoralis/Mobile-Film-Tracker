@@ -28,8 +28,8 @@
         <TextView
             android:id="@+id/fragment_film_tv_title"
             android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:gravity="center"
+            android:layout_height="wrap_content"
+            android:breakStrategy="balanced"
             android:text="Film title"
             android:textColor="@color/main_color_3"
             android:textSize="26sp" />
