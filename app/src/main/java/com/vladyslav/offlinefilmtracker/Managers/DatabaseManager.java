@@ -98,10 +98,9 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return new Thread(new Runnable() {
             @Override
             public void run() {
-                String genreParam = "%" + genreId + "%";
                 Cursor cursor = database.rawQuery(FILM_SELECT_QUERY +
-                        "WHERE films_Translated.lang_id = ? and films.genres like ? AND films.premiered > ? AND ratings.votes > 4000 " +
-                        "LIMIT ?", new String[]{lang, genreParam, String.valueOf(premiered), String.valueOf(limit)});
+                        "WHERE films_Translated.lang_id = ? AND (films.genres like ? OR films.genres like ?) AND films.premiered > ? AND ratings.votes > 4000 " +
+                        "LIMIT ?", new String[]{lang, "%," + genreId + ",%", genreId + ",%", String.valueOf(premiered), String.valueOf(limit)});
                 while (cursor.moveToNext())
                     films.add(getFilmData(cursor));
 
@@ -121,10 +120,10 @@ public class DatabaseManager extends SQLiteOpenHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String genreParam = "%" + genreId + "%";
+                String genreParam =  genreId + ",%";
                 cursor.add(database.rawQuery(FILM_SELECT_QUERY +
-                        "WHERE films_Translated.lang_id = ? and films.genres like ? " +
-                        "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{lang, genreParam}));
+                        "WHERE films_Translated.lang_id = ? AND (films.genres like ? OR films.genres like ?) " +
+                        "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{lang, "%," + genreId + ",%", genreId + ",%"}));
                 try {
                     runnable.run();
                 } catch (Exception e) {
