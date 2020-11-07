@@ -67,13 +67,13 @@ public class MainActivity extends AppCompatActivity {
                 //проверяем файлы
                 ResourcesManager resourcesManager = ResourcesManager.getInstance(getApplicationContext());
                 if (resourcesManager.photosZip == null)
-                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/7f0ftnfup1bmtjn/photos.zip?dl=0", path + "photos.zip"));
+                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/7gju5t3mkksbxl0/photos.zip?dl=0", path + "photos.zip"));
 
                 if (resourcesManager.postersZip == null)
-                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/92vwcr52oqdtrrj/posters.zip?dl=0", path + "posters.zip"));
+                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/t43kbskyvw09yfp/posters.zip?dl=0", path + "posters.zip"));
 
                 if (DatabaseManager.getInstance(getApplicationContext()) == null)
-                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/kb7e5roc76do03c/imdb.db?dl=0", path + "imdb.db"));
+                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/utyr6qun9efrfgc/filmsdb.db?dl=0", path + "filmsdb.db"));
 
                 runOnUiThread(runnable);
                 super.run();

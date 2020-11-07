@@ -21,7 +21,6 @@ import com.vladyslav.offlinefilmtracker.Objects.Film;
 import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
-import java.util.Map;
 
 public class MainFragment extends Fragment {
     private final double POSTER_SCALE_FACTOR = 0.30; //размер постеров у фильмов
@@ -32,7 +31,7 @@ public class MainFragment extends Fragment {
     private int moreBtnHeight; //размер кнопки More
 
     //массив id жанров
-    public final Integer[] genres = {-1, 1, 9, 16, 21, 18};
+    public final int[] genres = {-1, 1, 9, 16, 21, 18};
 
     @Nullable
     @Override
@@ -91,7 +90,7 @@ public class MainFragment extends Fragment {
     //создаем ряд с фильмами
     public void createFilmRow(ArrayList<Film> films, final Integer genreId) {
         final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //строка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(getString(R.string.films, databaseManager.getGenreById(genreId))); //устанавливаем заголовок строки
+        ((TextView) filmsLayout.getChildAt(0)).setText(databaseManager.getGenreById(genreId, true)); //устанавливаем заголовок строки
 
         final LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         Runnable runnable = new Runnable() {

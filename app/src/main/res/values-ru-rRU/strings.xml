@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dialog_title">Загрузка файлов</string>
+    <string name="close">Закрыть</string>
+    <string name="service_title">Приложение работает в фоновом режиме</string>
+    <string name="films">%1$s фильмы</string>
+    <string name="release_date">Дата выпуска: %1$s</string>
+    <string name="runtime">Продолжительность: %1$s минут</string>
+    <string name="directors">Режиссеры:</string>
+    <string name="producers">Продюсеры:</string>
+    <string name="writers">Писатели:</string>
+    <string name="actor_born">Родился: %1$s</string>
+    <string name="actor_died">Умер: %1$s</string>
+    <string name="unknown">неизвестно</string>
+    <string name="enter_film_name">Введите название фильма!</string>
+    <string name="movies">Фильмы</string>
+    <string name="search_for_movie">Поиск фильма</string>
+    <string name="plot">Сюжет</string>
+    <string name="cast">Актеры</string>
+    <string name="search_hint">Начните поиск названия фильма в строке поиска вверху, чтобы получить результаты</string>
+    <string name="downloading_error">Не удалось загрузить файлы</string>
+    <string name="categories">Жанры</string>
+    <string name="genre_popular">Популярные</string>
+    <string name="categories_hint">Найдите фильм в категориях!</string>
+    <string name="role_actor">Актер</string>
+    <string name="role_director">Режиссер</string>
+    <string name="role_producer">Продюсер</string>
+    <string name="role_writer">Писатель</string>
+</resources>

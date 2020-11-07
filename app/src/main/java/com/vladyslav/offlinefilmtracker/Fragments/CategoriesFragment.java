@@ -54,7 +54,7 @@ public class CategoriesFragment extends Fragment {
             LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(btnSize, btnSize);
             lp.setMargins(btnMargin, btnMargin, btnMargin, btnMargin);
             btn.setLayoutParams(lp);
-            btn.setText(databaseManager.getGenreById(genreEntry.getKey())); //устанавливаем текст
+            btn.setText(databaseManager.getGenreById(genreEntry.getKey(), true)); //устанавливаем текст
 
             //устанавливаем иконку
             btn.setCompoundDrawablesWithIntrinsicBounds(null, ResourcesManager.getInstance(getContext()).getGenreDrawableById(genreEntry.getKey()), null, null);

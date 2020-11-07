@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Offline Film Tracker</string>
     <string name="dialog_title">Завантаження файлів</string>
     <string name="close">Закрити</string>
     <string name="service_title">Додаток працює у фоновому режимі</string>
     <string name="films">%1$s фільми</string>
-    <string name="rating">%1$s\n(%2$s)</string>
     <string name="release_date">Дата випуску: %1$s</string>
     <string name="runtime">Тривалість: %1$s хвилин</string>
-    <string name="adult">18+</string>
     <string name="directors">Режисери: \t</string>
     <string name="producers">Продюсери: \t</string>
     <string name="writers">Письменники: \t</string>

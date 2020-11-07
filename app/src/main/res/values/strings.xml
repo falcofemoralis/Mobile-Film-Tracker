@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Offline Film Tracker</string>
+    <string name="app_name" translatable="false">Offline Film Tracker</string>
     <string name="dialog_title">Downloading files</string>
     <string name="close">Close</string>
     <string name="service_title">App is running in background</string>
     <string name="films">%1$s films</string>
-    <string name="rating">%1$s\n(%2$s)</string>
+    <string name="rating" translatable="false">%1$s\n (%2$s)</string>
     <string name="release_date">Release date: %1$s</string>
     <string name="runtime">Runtime: %1$s minutes</string>
-    <string name="adult">18+</string>
+    <string name="adult" translatable="false">18+</string>
     <string name="directors">Directors: \t</string>
     <string name="producers">Producers: \t</string>
     <string name="writers">Writers: \t</string>

@@ -100,7 +100,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
             public void run() {
                 String genreParam = "%" + genreId + "%";
                 Cursor cursor = database.rawQuery(FILM_SELECT_QUERY +
-                        "WHERE films_Translated.lang_id = ? and films.genres like ? AND films.premiered > ? " +
+                        "WHERE films_Translated.lang_id = ? and films.genres like ? AND films.premiered > ? AND ratings.votes > 4000 " +
                         "LIMIT ?", new String[]{lang, genreParam, String.valueOf(premiered), String.valueOf(limit)});
                 while (cursor.moveToNext())
                     films.add(getFilmData(cursor));
@@ -243,10 +243,27 @@ public class DatabaseManager extends SQLiteOpenHelper {
         })).start();
     }
 
-    public String getGenreById(int id) {
+    public String getGenreById(int id, boolean isLong) {
         if (genresMap.size() == 0) loadGenres();
-        if (id == -1) return context.getString(R.string.genre_popular);
-        else return genresMap.get(id);
+
+        String genre;
+        if (id == -1) genre = context.getString(R.string.genre_popular);
+        else genre = genresMap.get(id);
+
+        if (isLong) {
+            switch (lang) {
+                case "3":
+                    if (id == 1 || id == 16 || id == 21 || id == 3 || id == 7 || id == 11 || id == 12)
+                        return genre;
+                    break;
+                case "2":
+                    if (id == 1 || id == 3 || id == 7 || id == 11 || id == 12)
+                        return genre;
+            }
+            return context.getString(R.string.films, genre);
+        } else {
+            return genre;
+        }
     }
 
     public HashMap<Integer, String> getGenresMap() {

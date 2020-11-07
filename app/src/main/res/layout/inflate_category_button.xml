@@ -4,12 +4,15 @@
     android:layout_height="match_parent"
     android:layout_gravity="center"
     android:background="@drawable/button_background"
+    android:breakStrategy="balanced"
     android:drawableTop="@drawable/ic_category_biography"
     android:elevation="10dp"
+    android:paddingStart="7dp"
     android:paddingTop="20dp"
+    android:paddingEnd="7dp"
     android:paddingBottom="10dp"
     android:stateListAnimator="@null"
     android:text="no_genre"
     android:textAllCaps="false"
     android:textColor="@color/white"
-    android:textSize="14sp" />
+    android:textSize="13sp" />
