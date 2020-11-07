@@ -90,7 +90,7 @@ public class MainFragment extends Fragment {
     //создаем ряд с фильмами
     public void createFilmRow(ArrayList<Film> films, final Integer genreId) {
         final LinearLayout filmsLayout = (LinearLayout) LayoutInflater.from(getContext()).inflate(R.layout.inflate_film_row, null); //строка фильмов
-        ((TextView) filmsLayout.getChildAt(0)).setText(databaseManager.getGenreById(genreId, true)); //устанавливаем заголовок строки
+        ((TextView) filmsLayout.getChildAt(0)).setText(databaseManager.getGenreById(genreId)); //устанавливаем заголовок строки
 
         final LinearLayout linearLayout = (LinearLayout) ((HorizontalScrollView) filmsLayout.getChildAt(1)).getChildAt(0);
         Runnable runnable = new Runnable() {

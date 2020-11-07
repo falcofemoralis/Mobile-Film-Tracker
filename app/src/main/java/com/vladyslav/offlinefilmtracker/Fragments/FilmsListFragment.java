@@ -79,7 +79,7 @@ public class FilmsListFragment extends Fragment {
             //устанаваливаем заголовок фрагмента (если параметр являетсяжанр)
             TextView genreText = view.findViewById(R.id.fragment_filmslist_films_tv_header);
             if (isGenre)
-                genreText.setText(DatabaseManager.getInstance(getContext()).getGenreById(genreId, true));
+                genreText.setText(DatabaseManager.getInstance(getContext()).getGenreById(genreId));
             else
                 genreText.setVisibility(View.GONE);
 

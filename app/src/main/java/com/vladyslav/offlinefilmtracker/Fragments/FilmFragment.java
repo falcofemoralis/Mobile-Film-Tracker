@@ -94,7 +94,7 @@ public class FilmFragment extends Fragment {
 
         for (int genreId : filmGenresId) {
             TextView genresTV = (TextView) LayoutInflater.from(getContext()).inflate(R.layout.inflate_tag, null);
-            genresTV.setText(DatabaseManager.getInstance(getContext()).getGenreById(genreId, false));
+            genresTV.setText(DatabaseManager.getInstance(getContext()).getGenreById(genreId));
             genresLayout.addView(genresTV);
         }
     }

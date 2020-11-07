@@ -242,27 +242,11 @@ public class DatabaseManager extends SQLiteOpenHelper {
         })).start();
     }
 
-    public String getGenreById(int id, boolean isLong) {
+    public String getGenreById(int id) {
         if (genresMap.size() == 0) loadGenres();
 
-        String genre;
-        if (id == -1) genre = context.getString(R.string.genre_popular);
-        else genre = genresMap.get(id);
-
-        if (isLong) {
-            switch (lang) {
-                case "3":
-                    if (id == 1 || id == 16 || id == 21 || id == 3 || id == 7 || id == 11 || id == 12)
-                        return genre;
-                    break;
-                case "2":
-                    if (id == 1 || id == 3 || id == 7 || id == 11 || id == 12)
-                        return genre;
-            }
-            return context.getString(R.string.films, genre);
-        } else {
-            return genre;
-        }
+        if (id == -1) return context.getString(R.string.genre_popular);
+        else return genresMap.get(id);
     }
 
     public HashMap<Integer, String> getGenresMap() {
