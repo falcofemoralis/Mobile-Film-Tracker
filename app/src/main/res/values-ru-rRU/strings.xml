@@ -6,9 +6,9 @@
     <string name="films">%1$s фильмы</string>
     <string name="release_date">Дата выпуска: %1$s</string>
     <string name="runtime">Продолжительность: %1$s минут</string>
-    <string name="directors">Режиссеры:</string>
-    <string name="producers">Продюсеры:</string>
-    <string name="writers">Писатели:</string>
+    <string name="directors">Режиссеры: \t</string>
+    <string name="producers">Продюсеры: \t</string>
+    <string name="writers">Писатели: \t</string>
     <string name="actor_born">Родился: %1$s</string>
     <string name="actor_died">Умер: %1$s</string>
     <string name="unknown">неизвестно</string>
@@ -26,4 +26,7 @@
     <string name="role_director">Режиссер</string>
     <string name="role_producer">Продюсер</string>
     <string name="role_writer">Писатель</string>
+    <string name="bookmarks">Закладки</string>
+    <string name="bookmarked">Этот фильм был добавлен в закладки!</string>
+    <string name="bookmarks_hint">Ищите и добавляйте фильмы в закладки!</string>
 </resources>

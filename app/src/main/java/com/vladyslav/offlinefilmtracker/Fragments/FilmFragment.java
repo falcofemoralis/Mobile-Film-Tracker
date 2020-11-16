@@ -14,12 +14,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import com.vladyslav.offlinefilmtracker.Managers.DatabaseManager;
+import com.vladyslav.offlinefilmtracker.Managers.FileManager;
 import com.vladyslav.offlinefilmtracker.Managers.FragmentHelper;
 import com.vladyslav.offlinefilmtracker.Managers.ResourcesManager;
 import com.vladyslav.offlinefilmtracker.Objects.Actor;
@@ -28,12 +31,14 @@ import com.vladyslav.offlinefilmtracker.R;
 
 import java.util.ArrayList;
 
-public class FilmFragment extends Fragment {
+public class FilmFragment extends Fragment implements View.OnClickListener {
     private final double POSTER_SCALE_FACTOR = 0.55; //размер постеров у фильмов
     private final double PHOTO_SCALE_FACTOR = 1.5; //размер фото у актеров
     private static final String ARG_FILM = "param1"; //параметр объект фильма
     private Film film; //объект фильма
     private View view; ///вью фрагмента
+    private boolean isBookmarked;
+    private ArrayList<String> IDs;
 
     public static FilmFragment newInstance(Film film) {
         FilmFragment fragment = new FilmFragment();
@@ -57,6 +62,7 @@ public class FilmFragment extends Fragment {
         if (view == null) {
             view = inflater.inflate(R.layout.fragment_film, container, false);
 
+            checkBookmark();
             setBaseFilmInfo();
             setAdditionalFilmInfo();
             getCrew();
@@ -201,7 +207,6 @@ public class FilmFragment extends Fragment {
                         photoView.setLayoutParams(new LinearLayout.LayoutParams((ResourcesManager.getDpFromPx(photo[0].getBitmap().getWidth(), PHOTO_SCALE_FACTOR, getContext())),
                                 (ResourcesManager.getDpFromPx(photo[0].getBitmap().getHeight(), PHOTO_SCALE_FACTOR, getContext()))));
                         photoView.setImageDrawable(photo[0]);
-
                     }
                 });
             }
@@ -209,9 +214,9 @@ public class FilmFragment extends Fragment {
 
         //устанавливаем персонажей актера в фильме
         TextView charactersTV = (TextView) layout.getChildAt(2);
-        if(actor.getCharacters()[0].equals("")){
+        if (actor.getCharacters()[0].equals("")) {
             charactersTV.append((actor.getCategory()));
-        }else{
+        } else {
             for (String character : actor.getCharacters())
                 charactersTV.append(character + "\n");
         }
@@ -247,5 +252,34 @@ public class FilmFragment extends Fragment {
         return ss;
     }
 
+    private void checkBookmark() {
+        ImageView iv = view.findViewById(R.id.fragment_film_iv_bookmark);
+        iv.setOnClickListener(this);
 
+        String filmId = film.getFilm_id();
+        IDs = FileManager.read(getContext());
+        for (String ID : IDs) {
+            if (ID.equals(filmId)) {
+                isBookmarked = true;
+                iv.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_baseline_bookmarked_24));
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        ImageView bookmarkBtn = (ImageView) v;
+        if (isBookmarked) {
+            bookmarkBtn.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_baseline_unbookmarked_24));
+            IDs.remove(film.getFilm_id());
+            isBookmarked = false;
+        } else {
+            Toast.makeText(getContext(), getString(R.string.bookmarked), Toast.LENGTH_SHORT).show();
+            bookmarkBtn.setImageDrawable(ContextCompat.getDrawable(getContext(), R.drawable.ic_baseline_bookmarked_24));
+            IDs.add(film.getFilm_id());
+            isBookmarked = true;
+        }
+        FileManager.write(getContext(), IDs);
+    }
 }

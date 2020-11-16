@@ -120,7 +120,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String genreParam =  genreId + ",%";
+                String genreParam = genreId + ",%";
                 cursor.add(database.rawQuery(FILM_SELECT_QUERY +
                         "WHERE films_Translated.lang_id = ? AND (films.genres like ? OR films.genres like ?) " +
                         "ORDER BY ratings.votes DESC, ratings.rating DESC", new String[]{lang, "%," + genreId + ",%", genreId + ",%"}));
@@ -237,6 +237,23 @@ public class DatabaseManager extends SQLiteOpenHelper {
                 cursor.moveToFirst();
                 film[0] = getFilmData(cursor);
 
+                runnable.run();
+            }
+        })).start();
+    }
+
+    public void getFilmsByTitleIds(final ArrayList<String> filmsIDs, final ArrayList<Film> films, final Runnable runnable) {
+        (new Thread(new Runnable() {
+            @Override
+            public void run() {
+                for (String id : filmsIDs) {
+                    Cursor cursor = database.rawQuery(FILM_SELECT_QUERY +
+                            "WHERE films_Translated.lang_id = ? AND films.title_id = ?", new String[]{lang, id});
+                    cursor.moveToFirst();
+                    films.add(getFilmData(cursor));
+                    cursor.close();
+
+                }
                 runnable.run();
             }
         })).start();

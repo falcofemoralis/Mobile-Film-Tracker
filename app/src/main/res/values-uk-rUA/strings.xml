@@ -26,4 +26,7 @@
     <string name="role_director">Режисер</string>
     <string name="role_producer">Продюсер</string>
     <string name="role_writer">Письменник</string>
+    <string name="bookmarks">Закладки</string>
+    <string name="bookmarked">Цей фільм був доданий в закладки!</string>
+    <string name="bookmarks_hint">Шукайте і додавайте фільми в закладки!</string>
 </resources>

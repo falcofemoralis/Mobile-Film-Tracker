@@ -76,7 +76,7 @@ public class FilmsListFragment extends Fragment {
             progressBar = view.findViewById(R.id.fragment_filmslist_pb_loading);
             scrollView = getActivity().findViewById(R.id.nestedScrollView);
 
-            //устанаваливаем заголовок фрагмента (если параметр являетсяжанр)
+            //устанаваливаем заголовок фрагмента (если параметр является жанром)
             TextView genreText = view.findViewById(R.id.fragment_filmslist_films_tv_header);
             if (isGenre)
                 genreText.setText(DatabaseManager.getInstance(getContext()).getGenreById(genreId));

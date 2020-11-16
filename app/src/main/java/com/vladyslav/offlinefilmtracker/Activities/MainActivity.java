@@ -17,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.vladyslav.offlinefilmtracker.Fragments.BookmarksFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.CategoriesFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.MainFragment;
 import com.vladyslav.offlinefilmtracker.Fragments.SearchFragment;
@@ -110,6 +111,7 @@ public class MainActivity extends AppCompatActivity {
         final Fragment mainFragment = new MainFragment(); //главный фрагмент
         final Fragment searchFragment = new SearchFragment(); //фрагмент поиска
         final Fragment categoriesFragment = new CategoriesFragment(); //фрагмент поиска
+        final Fragment bookmarksFragments = new BookmarksFragment(); //фрагмент закладок
 
         //устанавливаем бар навигации
         BottomNavigationView bottomNavigationView = findViewById(R.id.activity_main_nv_bottomBar);
@@ -125,6 +127,9 @@ public class MainActivity extends AppCompatActivity {
                         break;
                     case R.id.nav_categories:
                         FragmentHelper.changeFragment(categoriesFragment);
+                        break;
+                    case R.id.nav_bookmarks:
+                        FragmentHelper.changeFragment(bookmarksFragments);
                         break;
                 }
                 return true;
