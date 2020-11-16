@@ -114,7 +114,7 @@ public class FilmFragment extends Fragment {
 
     public void getCrew() {
         final ArrayList<Actor> actors = new ArrayList<>();
-        DatabaseManager.getInstance(view.getContext()).getActorsByTitleId(film.getFilm_id(), actors, new Runnable() {
+        DatabaseManager.getInstance(view.getContext()).getActorsByFilmId(film.getFilm_id(), actors, new Runnable() {
             @Override
             public void run() {
                 getActivity().runOnUiThread(new Runnable() {
@@ -209,8 +209,12 @@ public class FilmFragment extends Fragment {
 
         //устанавливаем персонажей актера в фильме
         TextView charactersTV = (TextView) layout.getChildAt(2);
-        for (String character : actor.getCharacters())
-            charactersTV.append(character + "\n");
+        if(actor.getCharacters()[0].equals("")){
+            charactersTV.append((actor.getCategory()));
+        }else{
+            for (String character : actor.getCharacters())
+                charactersTV.append(character + "\n");
+        }
 
         //добавляем переход на фрагмент актера
         layout.setOnClickListener(new View.OnClickListener() {

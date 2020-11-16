@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
                     links.add(new Pair<>("https://dl.dropboxusercontent.com/s/t43kbskyvw09yfp/posters.zip?dl=0", path + "posters.zip"));
 
                 if (DatabaseManager.getInstance(getApplicationContext()) == null)
-                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/utyr6qun9efrfgc/filmsdb.db?dl=0", path + "filmsdb.db"));
+                    links.add(new Pair<>("https://dl.dropboxusercontent.com/s/gbw4xx8lnj0t5f8/filmsdb.db?dl=0", path + "filmsdb.db"));
 
                 runOnUiThread(runnable);
                 super.run();

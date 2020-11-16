@@ -120,10 +120,10 @@ public class MainFragment extends Fragment {
                         //устанавливаем постер
                         ImageView filmPoster = (ImageView) filmLayout.getChildAt(0);
 
-                        if (filmPoster != null) {
-                            int posterHeight = ResourcesManager.getDpFromPx(poster[0].getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext());
-                            int posterWidth = ResourcesManager.getDpFromPx(poster[0].getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext());
+                        final int posterHeight = ResourcesManager.getDpFromPx(poster[0].getBitmap().getHeight(), POSTER_SCALE_FACTOR, getContext());
+                        final int posterWidth = ResourcesManager.getDpFromPx(poster[0].getBitmap().getWidth(), POSTER_SCALE_FACTOR, getContext());
 
+                        if (filmPoster != null) {
                             filmPoster.setLayoutParams(new LinearLayout.LayoutParams(posterWidth, posterHeight));
                             filmPoster.setImageDrawable(poster[0]);
 

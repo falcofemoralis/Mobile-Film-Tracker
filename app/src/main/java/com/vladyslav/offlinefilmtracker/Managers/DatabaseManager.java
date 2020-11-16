@@ -151,13 +151,13 @@ public class DatabaseManager extends SQLiteOpenHelper {
     }
 
     //получение актеров в фильме
-    public void getActorsByTitleId(final String titleId, final ArrayList<Actor> actors, final Runnable runnable) {
+    public void getActorsByFilmId(final String filmId, final ArrayList<Actor> actors, final Runnable runnable) {
         (new Thread(new Runnable() {
             @Override
             public void run() {
                 Cursor cursor = database.rawQuery("SELECT people.person_id, people.name, people.born, people.died, crew.characters, crew.category " +
                         "FROM crew INNER JOIN people ON people.person_id = crew.person_id " +
-                        "WHERE crew.title_id = ?", new String[]{titleId});
+                        "WHERE crew.title_id = ?", new String[]{filmId});
 
                 while (cursor.moveToNext()) {
                     actors.add(new Actor(cursor.getString(cursor.getColumnIndex("person_id")),
@@ -173,7 +173,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         })).start();
     }
 
-    //получением фильмов актера
+    //получение фильмов актера
     public void getFilmsByPersonId(final String personId, final ArrayList<Film> films, final Runnable runnable) {
         (new Thread(new Runnable() {
             @Override
@@ -210,7 +210,7 @@ public class DatabaseManager extends SQLiteOpenHelper {
         return roles;
     }
 
-    //получение фильмов всех фильмов в кач-ве
+    //получение фильмов всех фильмов
     public void getAllFilms(final HashMap<String, String> films, final Runnable runnable) {
         (new Thread(new Runnable() {
             @Override
