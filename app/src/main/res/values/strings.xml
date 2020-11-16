@@ -4,7 +4,6 @@
     <string name="dialog_title">Downloading files</string>
     <string name="close">Close</string>
     <string name="service_title">App is running in background</string>
-    <string name="films">%1$s films</string>
     <string name="rating" translatable="false">%1$s\n (%2$s)</string>
     <string name="release_date">Release date: %1$s</string>
     <string name="runtime">Runtime: %1$s minutes</string>

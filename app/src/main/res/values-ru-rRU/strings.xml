@@ -3,7 +3,6 @@
     <string name="dialog_title">Загрузка файлов</string>
     <string name="close">Закрыть</string>
     <string name="service_title">Приложение работает в фоновом режиме</string>
-    <string name="films">%1$s фильмы</string>
     <string name="release_date">Дата выпуска: %1$s</string>
     <string name="runtime">Продолжительность: %1$s минут</string>
     <string name="directors">Режиссеры: \t</string>

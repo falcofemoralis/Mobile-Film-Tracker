@@ -3,7 +3,6 @@
     <string name="dialog_title">Завантаження файлів</string>
     <string name="close">Закрити</string>
     <string name="service_title">Додаток працює у фоновому режимі</string>
-    <string name="films">%1$s фільми</string>
     <string name="release_date">Дата випуску: %1$s</string>
     <string name="runtime">Тривалість: %1$s хвилин</string>
     <string name="directors">Режисери: \t</string>
